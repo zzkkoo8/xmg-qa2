@@ -4,26 +4,32 @@ Status: **Gate 0 Approved / Pre-Implementation**
 
 ## 1. 架构目标
 
-xmg-qa2 是企业问答 Harness。它必须把“控制流程”和“能力 Provider”分开。
+xmg-qa2 是企业技术支持问题回答专家 Agent 的可控 Harness / Runtime。
+
+它必须把“控制流程”和“能力 Provider”分开，并支持在受控边界内进行多步自动调查。
 
 系统核心只负责：
 
 - Runtime
 - Workflow
-- Plugin Registry
+- Capability / Plugin Registry
 - Context
-- Session
+- Session / Investigation State
 - Events
 - Policy
 - Observability
 
-外部能力通过插件接入：
+外部能力通过稳定 Contract / Plugin 接入：
 
 - Channels
 - Knowledge
 - Models
-- Tools
+- Tools / Product APIs / MCP
 - Policies
+
+完整的人类可读设计稿见：
+
+- [`../design/XMG-QA2-SUPPORT-AGENT-DESIGN.md`](../design/XMG-QA2-SUPPORT-AGENT-DESIGN.md)
 
 ## 2. 逻辑架构
 
@@ -38,24 +44,36 @@ DingTalk / REST / Web / Future Channel
        Session + Auth + Policy
                   |
                   v
-          Workflow Router
+           Support Workflow
                   |
-                  v
-          LangGraph Runtime
-                  |
-       +----------+----------+
-       |          |          |
-       v          v          v
-   Knowledge     Model      Tool
-   Registry      Registry   Registry
-       |          |          |
-   Providers   Providers   Providers
+       +----------+-----------+
+       |                      |
+       v                      v
+Initial Knowledge       Controlled Agentic
+   Retrieval              Investigation
+       |                      |
+       |             +--------+--------+
+       |             |        |        |
+       v             v        v        v
+   Knowledge       API      MCP      Tool
+   Registry       Tools    Tools     Tools
+       |             |        |        |
+       +-------------+--------+--------+
+                     |
+                     v
+              Evidence Workspace
+                     |
+            Hypothesis / Verify
+                     |
+                     v
+          Answer / Technical Report
 ```
 
 跨层能力：
 
 ```text
-Config / Trace / Metrics / Audit / Retry / Timeout / Circuit Breaker
+Config / Secrets / Trace / Metrics / Audit
+Retry / Timeout / Circuit Breaker / Rate Limit
 ```
 
 ## 3. Harness Core
@@ -66,18 +84,18 @@ Harness Core 应保持薄。
 
 负责：
 
-- 启动 Workflow。
+- 启动和恢复 Workflow。
 - 传递 Context。
 - 持久化/恢复 Workflow State。
-- 统一超时与取消。
+- 统一 timeout、retry、cancel 和 termination。
 - 输出 Runtime Event。
 
-### Plugin Registry
+### Capability / Plugin Registry
 
 负责：
 
 - 注册。
-- 能力发现。
+- capability 发现。
 - 生命周期。
 - 健康状态。
 - Provider 选择。
@@ -93,29 +111,30 @@ Workflow 通过 Context 获取：
 - Tool client
 - Policy
 - Trace
-- Session
+- Session / Investigation
 
-Context 暴露契约，不暴露 Provider 实现。
+Context 只暴露稳定契约，不暴露 Provider 实现。
 
 ### Event Bus
 
-统一表达：
+至少统一表达：
 
 - TurnStarted
+- InvestigationStarted
 - NodeStarted
 - RetrievalRequested
 - RetrievalCompleted
-- ModelRequested
-- ModelCompleted
 - ToolRequested
 - ToolCompleted
+- EvidenceCollected
+- HypothesisUpdated
 - VerificationCompleted
 - TurnCompleted
 - TurnFailed
 
-## 4. Workflow First
+## 4. Workflow First + Controlled Agentic Investigation
 
-V1 Product QA 参考状态图：
+外层核心流程必须是显式 Workflow / State Graph。
 
 ```text
 Input
@@ -124,47 +143,81 @@ Normalize
   |
 Policy Check
   |
-Intent Route
+Understand Problem
   |
-Retrieval Strategy
+Initial Retrieve
   |
-Knowledge Retrieve
+Evidence Gate ---- sufficient ----> Answer / Report
   |
-Evidence Gate -------- insufficient ------> Fallback
+insufficient
   |
-Answer Generate
+Plan Next Action
   |
-Grounding / Citation Verify
+Execute Authorized Capability
   |
-Output Policy
+Collect Evidence
   |
-Response
+Verify / Update Hypothesis
+  |
+Continue? ---- yes ----> Plan Next Action
+  |
+  no
+  |
+Answer / Fallback / Ask User
 ```
 
-关键控制点必须显式：
+Agent 可以在 `Plan Next Action` 等语义节点中参与决策，但整个 Investigation 必须受以下硬边界约束：
 
-- 最大重试次数。
-- 每个 Provider timeout。
-- Evidence 最低门槛。
-- 无证据策略。
-- 降级策略。
-- 最终失败策略。
+- `max_steps`
+- `max_duration`
+- `tool_allowlist`
+- permission / approval policy
+- Provider timeout
+- retry limit
+- token / cost budget
+- explicit termination condition
 
-## 5. LangGraph 边界
+禁止无限自由 Agent Loop。
+
+## 5. Evidence First
+
+Knowledge、API、MCP 和 Tool 的结果统一形成 Evidence。
+
+任何重要结论必须能够追溯到 Evidence；Evidence 不足时必须明确降级或说明不确定性。
+
+`ProviderUnavailable`、`Timeout`、`PermissionDenied` 等错误绝不能伪装成 `NoResult`。
+
+## 6. xmg-kb 边界
+
+xmg-kb 是独立知识工程项目和 Knowledge Provider。
+
+xmg-qa2 不负责：
+
+- 原始 PDF/PPT/Word 解析
+- OCR
+- 文档清洗
+- 去重
+- 分类
+- 切片
+- Embedding 批处理
+- 知识库构建
+
+xmg-qa2 只消费统一 Knowledge Contract，并记录实际使用的 knowledge version。
+
+## 7. LangGraph 边界
 
 LangGraph 是 Runtime Engine，不是领域模型。
 
 因此：
 
 - Domain 不依赖 LangGraph。
-- Knowledge Contract 不依赖 LangGraph。
-- Channel Contract 不依赖 LangGraph。
+- Knowledge / Tool / Channel Contract 不依赖 LangGraph。
 - Workflow 实现层可以使用 LangGraph。
-- Harness 可以将 LangGraph State 转换为自己的稳定状态模型。
+- Harness 负责把 LangGraph State 映射到自身稳定状态模型。
 
-这样未来替换执行引擎时，不破坏领域与 Provider 契约。
+这样未来替换 Runtime Engine 时，不破坏 Domain 和 Provider Contracts。
 
-## 6. 模块依赖
+## 8. 模块依赖
 
 目标依赖方向：
 
@@ -187,58 +240,68 @@ domain -> langgraph
 domain -> fastapi
 workflow -> dify SDK
 workflow -> dingtalk SDK
+workflow -> concrete product API SDK
 harness/contracts -> provider implementation
-knowledge plugin -> workflow business rule
+knowledge/tool plugin -> workflow business rule
 ```
 
-## 7. Provider Failure
+## 9. Provider Failure
 
-每个 Provider 必须统一映射错误类型：
+所有 Provider 必须统一映射稳定错误类型：
 
+- NoResult
 - ConfigurationError
 - AuthenticationError
+- PermissionDenied
 - TimeoutError
 - RateLimitError
 - ProviderUnavailable
 - InvalidResponse
 - ContractViolation
+- ToolExecutionFailed
 
-Workflow 只能依据稳定错误类型制定策略，不分析某厂商原始异常字符串。
+Workflow 只能依据稳定错误类型制定策略，不解析某厂商原始异常字符串。
 
-## 8. V1 成功标准
+## 10. V1 成功标准
 
 ### 架构
 
-- 替换 Knowledge Provider 不修改 Workflow 业务代码。
-- 替换 LLM Provider 不修改 Workflow 业务代码。
-- 增加 Channel 不修改核心问答 Workflow。
-- 每个插件可独立 contract test。
+- 替换 Knowledge Provider 不修改核心 Workflow。
+- 替换 LLM Provider 不修改核心 Workflow。
+- 增加 Tool/API Provider 不修改 Harness Core。
+- 增加 Channel 不修改核心技术支持 Workflow。
+- 每个插件可独立 Contract Test。
 
 ### 流程
 
-- 每次问答能够输出完整状态节点轨迹。
-- 每个重试有上限。
-- 无无限 Agent Loop。
+- 简单问题能够快速结束。
+- Evidence 不足时能够进入受控 Investigation。
+- 每个调查步骤、重试和 Tool Call 都有上限和 Trace。
+- Agent 达到预算/步骤/时间限制后一定能够终止。
 - Workflow 可恢复或至少可明确重放。
 
-### 知识问答
+### 问题回答
 
-- 回答能够关联 Evidence。
-- Evidence 不足时明确 fallback。
-- Provider 返回异常不被伪装成“无知识”。
+- 最终结论能够关联 Evidence。
+- 可以区分无结果、Provider 故障和权限失败。
+- 多 Evidence 冲突和 Evidence 不足都有明确策略。
+- 复杂问题能够输出 Technical Report。
 
 ### 工程
 
 - SpecKit 全流程通过。
 - 关键依赖规则由 CI 验证。
-- 单元、契约、集成、E2E 测试分层存在。
+- Unit、Contract、Workflow、Integration、E2E 测试分层存在。
 
-## 9. 非目标
+## 11. V1 非目标
 
 V1 不追求：
 
-- 自主规划型通用 Agent。
-- 多 Agent 协作平台。
+- 真实 xmg-kb 生产接入。
+- DingTalk 生产接入。
+- 真实高风险自动执行 Tool。
+- 通用自主规划型 Agent。
+- Multi-Agent Supervisor 平台。
 - 通用低代码工作流 UI。
 - 知识清洗平台。
 - Prompt 管理 SaaS。
