@@ -28,7 +28,9 @@
 | limits/renderer_version/sanitizer_profile | 时间、输入/输出上限和固定渲染规则 |
 | source/provenance | 原始来源、许可、审核记录；资产引用必须可访问 |
 
-ReportSnapshot 固定 result_version、claims、evidence_refs、observed_at、recommendations、pending_items、execution_status；Artifact 记录 snapshot_hash/template_version/renderer_version。旧报告不随模板修改而变化，重新渲染创建新版本并标注，下载仍校验当前权限。
+ReportSnapshot 固定 result_version、answer_kind、question_coverage、claims、evidence_refs、observed_at、recommendations、pending_items、execution_status；Artifact 记录 snapshot_hash/template_version/renderer_version。旧报告不随模板修改而变化，重新渲染创建新版本并标注，下载仍校验当前权限。
+
+按[问答核心](QA-CORE.md)的答复类型选择短答、步骤或调查报告模板；通用解释允许 evidence_refs 为空并标明通用说明，不强迫虚构引用。必需的状态/待办/风险按实际内容展示，不能因空字段堆砌长报告。
 
 内置模板随镜像只读提供；Admin 模板版本持久入库，资产存 ArtifactStore。优先级为获准项目配置 → 组织默认 → 内置默认，不能跨客户查找；发布前验证 fallback 也有同等数据范围。preview 使用合成样例，显式选真实 Case 时重新校验 ACL。
 

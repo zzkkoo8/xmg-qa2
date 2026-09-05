@@ -49,6 +49,8 @@ stateDiagram-v2
 
 运行状态与 Case 状态分开：一个 Run 可成功结束于 WAITING_FOR_HUMAN，SupportTask 仍未解决。等待超时最多触发提醒/接手，不自动标记 RESOLVED/CLOSED。已关闭的任务重开时重新核验权限和版本，不自动复活旧凭证。
 
+QuestionFrame/AnswerPlan/NextAction 等[问答投影](QA-CORE.md)属于 Task/Investigation/StepCommit；不另设一套持久任务。结果 answer_kind（complete/partial/needs_input/unable_to_conclude）与 Case 状态分开：只有完整回答当前目标并通过检查才 RESOLVED，关键待办或故障待验证保持调查/等待/暂停。通用直答可在同一短 Run 经过 ANALYZING/INVESTIGATING 完成，不强制调用检索/工具。
+
 ## 3. 幂等与并发
 
 | 环节 | 唯一约束或校验 |

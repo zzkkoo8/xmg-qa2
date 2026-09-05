@@ -1,14 +1,15 @@
 # xmg-qa2 · 小马哥数字人
 
-面向企业技术支持的只读调查 Agent：理解问题，融合产品知识与通用技术，调用获准的 API/MCP/工具验证，必要时请求工程师补充，跨天恢复同一任务，输出有依据的答案与报告。
+以高质量回答问题为核心的技术支持 Agent：理解问题，融合产品知识与通用技术，调用获准的 API/MCP/工具验证，必要时请求工程师补充，跨天恢复同一任务，输出有依据的答案与报告。
 
-当前状态：**2026-09-05 需求 1.1 与架构补全；包含 Chat/Admin、分发与模板设计。业务代码尚未实现，首个 Feature 门禁尚待执行。**
+当前状态：**2026-09-05 需求 1.2：补齐问答核心、自主调查和质量评测；保留 Chat/Admin、分发与模板设计。业务代码尚未实现，首个 Feature 门禁尚待执行。**
 
 ## 先读这几份
 
 | 文档 | 用途 |
 | --- | --- |
 | [需求基线](docs/requirements/REQUIREMENTS-BASELINE.md) | 已确认 Q1–9、剩余默认选择、V1 范围、验收目标 |
+| [问答核心](docs/architecture/QA-CORE.md) / [答案质量](docs/governance/ANSWER-QUALITY.md) | 如何理解问题、自主补证、生成验证答案及评测 |
 | [技术支持 Agent 设计](docs/design/XMG-QA2-SUPPORT-AGENT-DESIGN.md) | 产品行为、示例和总览 |
 | [开源选型与架构审计](docs/research/2026-09-05-STACK-AUDIT.md) | 21 个仓库热度快照、官方依据、取舍与限制 |
 | [架构基线](docs/architecture/ARCHITECTURE-BASELINE.md) | API/Worker、组件职责、持久化与部署 |

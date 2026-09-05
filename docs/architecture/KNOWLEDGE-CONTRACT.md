@@ -39,6 +39,8 @@ ACL 必须在检索和第三方 rerank/LLM 之前落实，返回后再复核。�
 
 动态证据裁决按命题类型和适用性综合判断，不使用“现场 > 内部 > 官网”的绝对排名。用户陈述保留原意、状态和时间；外部网站和检索片段中的指令只作为数据，不改变系统 Policy。
 
+按子问题查询、去重、补原文上下文、保留反证和有界证据包见 [QA Core](QA-CORE.md)。混合搜索/重排只使用提供方声明的能力；新增适配策略先比较冻结题集收益，不以相关度替代最终答案质量。
+
 ## 4. Dify 首个适配器
 
 采用纯检索 API，不调用 Dify Chat API 生成第二份答案。当前官方定义为 POST /datasets/{dataset_id}/retrieve，query 最大 250 字符，返回 records/segment/document/score。完整 base URL 和字段以实际安装版本核验。[Dify 检索 API](https://docs.dify.ai/en/api-reference/knowledge-bases/retrieve-chunks-from-a-knowledge-base-test-retrieval)

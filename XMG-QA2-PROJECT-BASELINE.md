@@ -2,11 +2,11 @@
 
 日期：2026-09-05。
 
-**小马哥 = 持久 SupportTask + 显式调查工作流 + 动态证据裁决 + 获准只读能力 + 人工协助与恢复。**
+**核心目标：高质量回答问题；以问题理解、证据、自主调查和答案验证实现，以任务/Web/插件/部署支撑。**
 
 ## 状态
 
-需求 Q1–9 已确认；本轮追加 Chat/Admin、便捷分发与 HTML/MD 模板要求，需求/Constitution 升到 1.1。已补 Web/分发/模板设计与开发机交接。仓库仍为 Pre-Implementation，不包含已运行服务或通过真实联调的主张。
+需求 Q1–9 已确认；本轮追加 Chat/Admin、便捷分发与 HTML/MD 模板要求，最新明确问答优先，需求/Constitution 升到 1.2。已补问答核心、质量评测及 Web/分发/模板设计与开发机交接。仓库仍为 Pre-Implementation，不包含已运行服务或通过真实联调的主张。
 
 ## 唯一来源
 
@@ -14,6 +14,7 @@
 - 组件与职责：[Architecture Baseline](docs/architecture/ARCHITECTURE-BASELINE.md)。
 - 技术事实与选型理由：[Stack Audit](docs/research/2026-09-05-STACK-AUDIT.md)。
 - 本轮五项审计：[Web/Delivery Audit](docs/research/2026-09-05-WEB-DELIVERY-AUDIT.md)。
+- 问答主线：[QA Core](docs/architecture/QA-CORE.md)、[Answer Quality](docs/governance/ANSWER-QUALITY.md)。
 - 状态、能力、证据：docs/architecture 对应契约。
 - 实施顺序：[V1 Delivery Plan](docs/plans/V1-DELIVERY-PLAN.md)。
 - 约束：[Constitution](.specify/memory/constitution.md)、AGENTS.md 和开发门禁。

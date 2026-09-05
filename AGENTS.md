@@ -102,6 +102,8 @@ xmg-qa2 只消费 Knowledge Contract。
 
 无证据或证据不足时，Workflow 必须进入明确定义的 fallback，不得编造答案。
 
+产品首要目标是高质量回答问题；按 [QA Core](docs/architecture/QA-CORE.md) 理解子问题、选择补证动作、生成与检查答案，按 [Answer Quality](docs/governance/ANSWER-QUALITY.md) 验收。低风险稳定通用解释可经显式路由直答，产品事实仍内部知识优先。部分回答不得自动结案，工具数量/引用数量不能代替正确性。
+
 ## 5. 可观测性
 
 每个 Turn 至少应可关联：

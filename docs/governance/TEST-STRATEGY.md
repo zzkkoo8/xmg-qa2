@@ -9,7 +9,7 @@
 | Workflow | 内部优先、证据不足升级、冲突、无进展、取消、人工请求 | 节点/状态/事件与下一步判断 |
 | Integration | PG/checkpointer/Celery/broker；发布与恢复崩溃窗口 | 实际进程重启/消息重投、唯一键和事件记录 |
 | E2E | 钉钉 + 真实 KB/模型/只读能力 + 人工补充 + Web/报告 | 完整 task_id 链路；不能只用 TestProvider |
-| Evaluation | 真实中文产品标注集、版本/现场/通用技术问题 | 支持关系、正确升级、费用与延迟，工程师复核 |
+| Evaluation | 产品/通用/版本/多问题/现场/资料不足与动作轨迹 | 正确性、覆盖、证据支持、可行动、求助精确率/召回率；详见[问答质量](ANSWER-QUALITY.md) |
 | Operations | Compose、迁移、备份恢复、升级/旧图回退 | 可复现运行命令、环境版本、输出与失败说明 |
 | Web/Control Plane | Chat 事件重连、Admin 发布、登录/会话/角色/Case 权限 | TypeScript 构建、必要组件测试与 Playwright/API 越权测试 |
 | Presentation | 模板版本、HTML/MD 清洗、必需输出、资源上限 | 恶意输入与跨客户样例、隔离失败与降级记录 |
@@ -27,7 +27,7 @@
 
 以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)第 5 节和[联合验收](../plans/V1-DELIVERY-PLAN.md)为准；所有数值为待测目标。记录硬件、依赖版本、样本数、并发、p50/p95、失败率、provider 时延与费用，不用纯 Fake 结果推算生产性能。
 
-不少于 100 个人工标注案例，冻结回归集；确定性安全和数据隔离场景零失败。引用覆盖不等于引用正确；Ragas/LLM 评分辅助人工复核，不单独决定上线。
+首个 Feature 建合成控制场景，真实 KB/模型 Feature 即交付质量基线，不等最终发布才评答案。不少于 100 个独立冻结人工标注案例，开发集另计；确定性安全和数据隔离场景零失败。引用覆盖不等于引用正确；Ragas/LLM 评分辅助人工复核，不单独决定上线。
 
 ## 4. 本轮文档变更的验证
 

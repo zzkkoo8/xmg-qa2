@@ -1,6 +1,6 @@
 # xmg-qa2 Constitution
 
-Version: 1.1.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-05
+Version: 1.2.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-05
 
 授权来源：用户已确认 Q1–9，并于 2026-09-05 授权剩余问题采用最佳方案、审计修订设计并推送。本文由未填写模板形成项目宪法；此授权不包含业务编码、部署或生产目标变更。
 
@@ -52,6 +52,10 @@ Channel、Knowledge、Model、Tool、Policy 经稳定契约；Provider 私有类
 
 开发/构建与目标部署分开；从第一 Feature 建基础打包，发布交付完整在线/离线包、镜像清单、健康/迁移/备份回退。没有实际通过对应平台与恢复测试，不承诺支持、一键安装或可无损回退。具体边界见 ADR-0007。
 
+## XII. 问答质量为核心
+
+先理解用户所问，以正确、切题、可行动的答案及适当的持续调查衡量产品。按缺口选择获准能力，简单问题及时回答，复杂问题补证、验证和求助；不以工具数、输出长度或自动结案率替代质量。问答场景和评测从首个 Feature 开始，真实 KB/模型阶段建立质量基线。Web、任务、插件、模板与分发支撑问答，不删除既有可靠性和交付要求。
+
 ## 开发与 Git 治理
 
 - 使用标准 Git；允许标准 linked worktree 的 .git 文件，禁止自造 .git-data 替代。
@@ -69,3 +73,5 @@ Channel、Knowledge、Model、Tool、Policy 经稳定契约；Provider 私有类
 本次同步：替换空模板；落实只读、持久任务、配置能力、真实 V1、开源复用和外发边界。未开放 Coding Gate。后续实施状态见 docs/governance/DEVELOPMENT-GATES.md。
 
 1.1.0 增补来源：用户本轮五项 Web/分发/扩展/编码准备审计要求；对应 ADR-0007 和需求 FR13–17。同步 Web、Presentation、Distribution、交付路线与门禁；此设计增补不冒充 Feature spec/plan/analyze 已执行。
+
+1.2.0 增补来源：用户要求以高质量问答与自主处理为产品核心；对应 ADR-0008 和 FR18–20。新增问答/评测规范，同步 Workflow、Task/Presentation 投影和实施优先级；不开放业务编码门禁。

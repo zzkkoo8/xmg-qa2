@@ -1,12 +1,14 @@
 # xmg-qa2 架构基线
 
-版本：1.1；日期：2026-09-05；状态：设计完成，Pre-Implementation。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
+版本：1.2；日期：2026-09-05；状态：设计完成，Pre-Implementation。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
 
 ## 1. 架构决定
 
 采用模块化单体代码库、中央 API 和独立 Worker 进程。LangGraph 负责调查图，Celery + RabbitMQ 负责有界执行段分发，PostgreSQL 负责业务任务和持久检查点。复用现有 Dify 知识服务，不重新构建知识平台。
 
 “XMG Harness”仅是业务控制与适配边界，不自研通用 Agent 框架、消息队列、调度器、向量数据库或低代码平台。选型理由和替代方案见[审计报告](../research/2026-09-05-STACK-AUDIT.md)。
+
+核心业务是[高质量问答](QA-CORE.md)：QuestionFrame → 按证据选取检索/调查能力 → AnswerDraft/AnswerCheck。语义对象归属现有 domain/application/workflow，调用既有 Contracts；不增加独立 Agent 服务。题集与质量门禁从首个问答 Feature 开始，任务/Web/配置/分发是其支撑。
 
 ## 2. 部署关系
 
@@ -44,7 +46,7 @@ flowchart TD
 | 能力 | 官方 MCP SDK + HTTP 工具适配器 + 审核后 Skill 包 | 协议不是权限；内部 Capability ID 唯一，必须经服务端策略 |
 | 配置 | YAML/JSON + Pydantic/JSON Schema | 声明阶段、优先级、条件、限制和版本；禁止 eval/任意导入 |
 | 观测 | OpenTelemetry + 结构化日志 + 业务审计事件 | 可复用已有后端；Langfuse 为可选 profile，不阻断主流程 |
-| 评测 | pytest + 人工标注题集；Ragas 可选离线依赖 | 确定性安全/恢复门禁优先，模型打分仅辅助 |
+| 评测 | pytest + 人工标注题集；Ragas 可选离线依赖 | 正确性/覆盖/行动质量与确定性安全/恢复共同验收，模型打分仅辅助 |
 | Web | React/TypeScript/Vite、Tailwind/shadcn、TanStack、assistant-ui | Chat/Admin 同一 SPA；自有 Task API、生成客户端；不做拖拽编辑器 |
 | 身份 | pwdlib/Argon2、PyJWT、本地账户与可撤销会话；组织身份可选 | 后端 RBAC + Case ACL；Admin 不自动获得客户数据或生产写权限 |
 | 模板 | TemplateProvider、受限 Jinja、nh3 | 安全 HTML/Markdown、主题与版本发布；不能执行任意代码 |

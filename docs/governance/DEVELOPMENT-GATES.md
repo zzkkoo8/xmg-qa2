@@ -4,8 +4,8 @@
 
 | Gate | 通过条件 | 当前状态 |
 | --- | --- | --- |
-| 0 需求/架构方向 | 已知需求、默认项及取舍有来源；用户授权形成设计 | 需求 1.1，含 Chat/Admin、分发与模板；设计可交接 |
-| 1 Constitution | 与当前需求一致，无占位符/冲突，授权可追溯 | 本轮增补到 1.1.0；不自动开放编码 |
+| 0 需求/架构方向 | 已知需求、默认项及取舍有来源；用户授权形成设计 | 需求 1.2，含问答核心/质量评测、Chat/Admin、分发与模板；设计可交接 |
+| 1 Constitution | 与当前需求一致，无占位符/冲突，授权可追溯 | 本轮增补到 1.2.0；不自动开放编码 |
 | 2 Feature Spec | 官方 Spec Kit 生成，场景/FR/NFR/非目标明确，关键歧义解决 | 运行时 Feature 尚未创建 |
 | 3 Plan/Checklist/Tasks | 模块/版本/Schema/错误/安全/测试/回退齐全，任务可执行 | 仅有产品交付路线；尚无获批运行时 Feature Plan |
 | 4 Analyze | Critical=0、High=0；Medium 有决定；Checklist 无阻塞 | 本轮文档自审不冒充 Spec Kit Analyze；运行时门禁未通过 |
