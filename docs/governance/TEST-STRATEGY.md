@@ -11,6 +11,9 @@
 | E2E | 钉钉 + 真实 KB/模型/只读能力 + 人工补充 + Web/报告 | 完整 task_id 链路；不能只用 TestProvider |
 | Evaluation | 真实中文产品标注集、版本/现场/通用技术问题 | 支持关系、正确升级、费用与延迟，工程师复核 |
 | Operations | Compose、迁移、备份恢复、升级/旧图回退 | 可复现运行命令、环境版本、输出与失败说明 |
+| Web/Control Plane | Chat 事件重连、Admin 发布、登录/会话/角色/Case 权限 | TypeScript 构建、必要组件测试与 Playwright/API 越权测试 |
+| Presentation | 模板版本、HTML/MD 清洗、必需输出、资源上限 | 恶意输入与跨客户样例、隔离失败与降级记录 |
+| Distribution | 在线/离线包、全依赖镜像、平台、无开发工具安装 | 干净 Linux、断开 registry/npm/PyPI、重复安装和 schema 回退测试 |
 
 ## 2. 必须覆盖的故障
 

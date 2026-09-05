@@ -169,3 +169,11 @@ xmg-qa2 只消费 Knowledge Contract。
 - 本系统任务/报告写入和授权渠道通知允许通过明确 system_effect 执行，不与客户目标写权限混淆。
 - 优先成熟开源；核心只实现支持领域规则，不堆叠多个 Agent 框架或知识入库系统。
 - 用户已授权本轮设计修订与推送；不因此推断业务编码、合并主分支或部署授权。
+
+## 10. Web、模板与分发
+
+- V1 包含 Chat/Admin；前端按 [Web Console](docs/architecture/WEB-CONSOLE.md)，不新建第二 Agent 后端或浏览器直连模型/KB。
+- Admin 可写自有配置，但不能放宽客户目标只读权限；Case ACL 与管理员角色独立。
+- HTML/MD/主题按 [Presentation Contract](docs/architecture/PRESENTATION-CONTRACT.md)；模板热发布不等于任意 JS/Python 热执行。
+- 开发、镜像、在线/离线包及回退按 [Distribution](docs/architecture/DISTRIBUTION-DEPLOYMENT.md)；不能改坏开发机其他项目的工具链。
+- 第一 Feature 起步与现有缺口见 [Implementation Readiness](docs/plans/IMPLEMENTATION-READINESS.md)。用户已明确授权的实现范围通过规定门禁后直接执行，不重复索要相同授权。

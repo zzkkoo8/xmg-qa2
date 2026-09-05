@@ -34,6 +34,8 @@ Skill 的说明、脚本与资源经过审查及版本固定；临时脚本默�
 
 简单答复：结论 → 必要步骤 → 引用 → 未确认事项。复杂调查自动生成 Markdown 报告，内容为问题/环境、观察证据、假设与验证、已排除项、当前结论、建议、执行风险、待办与来源。
 
+Chat 与 Admin 为两个业务面板，共用前端工程和后端权限。Chat 负责沟通/补证，Admin 配置连接、能力、工作流、主题与 HTML/Markdown 模板。报告可选择安全 HTML 导出，旧结果固定模板版本；新增交互页面通过构建期扩展。发布提供预构建镜像、在线配置包与按平台验证的离线包，部署端不需要开发工具链。
+
 报告必须区分建议执行与确实执行过的步骤，保留采集时间和产品版本。不能将 trace、模型内部思维链、凭证和原始客户秘密作为报告内容。下载与分享按 case 权限检查。
 
 ## 6. 具体设计入口
@@ -47,5 +49,7 @@ Skill 的说明、脚本与资源经过审查及版本固定；临时脚本默�
 | 知识引用与来源裁决 | [Knowledge Contract](../architecture/KNOWLEDGE-CONTRACT.md) |
 | 插件、MCP/Skill 与只读策略 | [Plugin Contract](../architecture/PLUGIN-CONTRACT.md) |
 | 分阶段实现与验收 | [Delivery Plan](../plans/V1-DELIVERY-PLAN.md) |
+| 双面板、个性化与交付 | [Web](../architecture/WEB-CONSOLE.md)、[模板](../architecture/PRESENTATION-CONTRACT.md)、[分发部署](../architecture/DISTRIBUTION-DEPLOYMENT.md) |
+| 是否可进入编码 | [就绪判断与 Codex 交接](../plans/IMPLEMENTATION-READINESS.md) |
 
 本轮解决的是设计冲突。真实 KB、钉钉、工具、并发和恢复能力尚须按计划实现和验收，不以文档完成代替软件完成。

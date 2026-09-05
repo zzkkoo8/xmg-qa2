@@ -6,15 +6,16 @@ V1 定义见[需求基线](../requirements/REQUIREMENTS-BASELINE.md)。“第一
 
 ## 1. Feature 顺序
 
-下列 003–007 为建议编号，创建时由 Spec Kit 检查分支/规格占用后分配。
+下列 003–008 为建议编号，创建时由 Spec Kit 检查分支/规格占用后分配。本轮增加 Admin/模板交付阶段；历史建议编号不是已创建 Feature。
 
 | Feature | 产物与关联需求 | 可独立验收 | 必须停止并记录的阻塞 |
 | --- | --- | --- | --- |
-| 003 持久任务与最小支持核心 | SupportTask/Turn/Run/HumanRequest、API、PG、图、Fake 合约；FR01/05/12 | 从 API 创建 → 模拟补证 → interrupt → 重启 → resume；双 Worker/重复事件测试 | 图/PG/checkpointer 版本组合失败；并发恢复协议不成立 |
+| 003 支持核心与开发基础 | 持久任务/ResumeAttempt、API、PG/图/broker、Fake 合约；Chat/Admin 壳、最小本地认证/ACL、开发 Compose/镜像/CI；FR01/05/12/13/14/17 基础 | API 创建→等待→重启→恢复；并发/定向恢复；登录与任务页真实串接；干净构建 | 版本组合失败；恢复协议不成立；开发环境依赖不可用 |
 | 004 真实知识与模型 | Dify Adapter、Evidence/claim、真实模型、外发 Policy；FR02/06/07/08/10 | 固定中文产品题集真实检索/生成；无结果/鉴权失败/故障分类；客户隔离 | Dify 地址/版本/权限、模型凭证、测试题集缺失 |
 | 005 配置能力与只读取证 | Registry/YAML、官方 web provider、一类真实产品只读 API/MCP；FR03/04/07/11 | 配置更换优先级；至少一次真实知识不足→工具取证→再判断；所有写动作拒绝 | 目标系统没有可验证只读接口/账户，不得用 Fake 充数 |
-| 006 钉钉、Web 与人工闭环 | 官方 Stream Adapter、幂等通知、任务 Web 页、日志补充、Markdown 报告；FR01/05/09/10 | 真实钉钉创建→工程师回传→继续调查；Web 查看/补充/取消/下载；通知失败恢复 | 应用权限/收件映射/持久发送 API 未配置 |
-| 007 发布联合验收 | Compose、迁移/备份/回退、观测、人工标注评测、故障注入；全部 FR | 完整真实链路、72 小时等价等待、容量/SLO、零越权场景、回退演练 | 任一真实接入缺失、安全失败、恢复丢案 |
+| 006 钉钉、Chat 与人工闭环 | Stream Adapter、幂等通知、完整 Chat、日志补充、固定内置报告；FR01/05/09/10/13 | 真实钉钉创建→工程师回传→继续调查；Chat 流式/重连/引用/取消/下载；通知失败恢复 | 应用权限/收件映射/持久发送 API 未配置 |
+| 007 Admin、模板与展示扩展 | 连接/能力/工作流发布、账号权限审计、HTML/MD 模板、主题、构建期 UI 注册；FR03/07/10/11/14/15/16 | 配置/模板发布回退；旧 Case/报告版本固定；禁用能力生效；XSS/模板越权拒绝 | Renderer/权限隔离失败；版本发布绕过策略 |
+| 008 分发发布联合验收 | Release/OCI/在线配置/每平台离线包、迁移/备份/回退、观测、评测；全部 FR | 干净主机在线/断网安装；完整真实链路、72 小时等价等待、SLO/回退；无 Node 部署 | 任一真实接入缺失、安全失败、恢复丢案、离线镜像不全 |
 
 Fake 阶段是便于验证领域与恢复机制的内部里程碑，不能对外宣称“V1 已完成”。
 
@@ -33,6 +34,8 @@ Fake 阶段是便于验证领域与恢复机制的内部里程碑，不能对外
 先在测试环境固定 Python 3.12、目标 PostgreSQL 主版本、FastAPI/Pydantic、SQLAlchemy/psycopg、LangGraph/checkpoint-postgres、Celery/Kombu/RabbitMQ 和 MCP SDK/协议组合，生成 uv.lock 与镜像 digest。
 
 必须验证：checkpoint schema 初始化、interrupt/resume、同步持久化、Worker event loop/进程生命周期、连接池不跨 fork 错用、取消与重试、模型结构化响应、钉钉 SDK 重连。不得直接把 README 最新标签当作已兼容组合。
+
+前端固定 Node LTS/pnpm、React/Vite、Tailwind/shadcn primitive、TanStack、assistant-ui 和生成客户端版本，提交 lock；同时验证 pwdlib/PyJWT、模板 renderer/sanitizer 与基础镜像平台。不因开发机组件冲突升级其他项目的 Node/npm 或共享 Docker。
 
 SDK、PyPI、容器标签可不同；冻结实际安装渠道和 SHA。无充分依据不使用预发布特性，不重写 vendored Spec Kit 脚本。
 
@@ -57,6 +60,11 @@ SDK、PyPI、容器标签可不同；冻结实际安装渠道和 SHA。无充分
 | 连续无新增证据或预算耗尽 | 阶段总结 + 暂停/人工协助，无法绕过上限 |
 | PostgreSQL/队列故障后恢复 | 不丢已 ACK 输入；已持久 Outbox 可重投 |
 | 取消发生在模型/工具请求中 | 记录在途动作，取消后不再发布旧结果或发新动作 |
+| Chat 刷新、SSE 断线、游标过期 | 从任务快照恢复/补事件；不新建 Case 或重新发起模型调用 |
+| viewer 请求 Admin API、伪造身份头、CSRF、注销会话 | 后端拒绝；角色变更与会话撤销及时生效 |
+| 工作流/模板同时编辑、发布与回退 | 版本冲突明确；旧 Case/报告不漂移；禁用能力仍立即检查 |
+| 自定义 HTML/MD 企图执行脚本、访问文件/网络或超限渲染 | 清洗/隔离/资源限制生效，失败不污染最终报告 |
+| 断网安装、架构错误、重复安装、升级后回退 | 镜像清单完整；错误阻止启动；不删除数据卷；按 schema 兼容或一致备份恢复 |
 
 ## 5. 评测与运维验收
 
@@ -69,3 +77,5 @@ SLO 和指标口径在需求基线中；达不到时报告样本、外部依赖�
 ## 6. 本轮范围
 
 本轮已授权：需求和选型研究、设计/契约/治理文档修订、分支提交与推送。未授权/未执行：业务代码、服务部署、接入客户生产机、自动修改生产配置。真实部署资料留给对应 Feature 接入，不阻塞本轮设计交付。
+
+具体设计见 [Web](../architecture/WEB-CONSOLE.md)、[模板](../architecture/PRESENTATION-CONTRACT.md)、[分发](../architecture/DISTRIBUTION-DEPLOYMENT.md)。开发机起步范围和可发送执行提示词见 [编码就绪与交接](IMPLEMENTATION-READINESS.md)。

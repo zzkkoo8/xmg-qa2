@@ -2,6 +2,8 @@
 
 日期：2026-09-05；受众：项目负责人、架构与实施工程师。
 
+本文保留前次设计审计记录；随后追加的 Chat/Admin、分发与模板范围以 [Web/交付审计补充](2026-09-05-WEB-DELIVERY-AUDIT.md) 和需求 1.1 为准。下文“简易 Web”等描述属于前次选型快照。
+
 审计基准：[main 提交 a2c5399](https://github.com/zzkkoo8/xmg-qa2/tree/a2c5399f7c86c19913ca857e7745544e30e0f6c5)。旧 docs/001-support-agent-design 分支逐文件 SHA 与该基线一致。本轮交付为研究与设计修订，不包含业务实现或实际部署测试。
 
 ## 1. 结论

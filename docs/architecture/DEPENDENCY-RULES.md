@@ -14,6 +14,10 @@
 | api / channel | 应用服务接口、contracts | 证据裁决、调查逻辑、直接修改图内部状态 |
 | composition root | 装配具体 runtime、plugins、infrastructure | 业务策略 |
 | observability | 事件契约、OTel | 作为业务状态真相 |
+| web | 生成 API 类型/客户端、共享 UI、任务事件 Adapter | Provider 凭证、LangGraph 私有状态、直接访问 KB/模型/MCP |
+| presentation | ReportSnapshot/Template 契约、受控 renderer/sanitizer | 目标工具调用、数据库 ORM 对象、任意文件/网络 |
+
+Admin API 经应用服务完成配置发布、RBAC 和审计；前端隐藏菜单不能代替权限。业务结果先冻结成 ReportSnapshot，再经展示端口渲染，模板不修改调查状态。
 
 workflows 可使用 LangGraph，但图私有 State 不暴露给 domain/HTTP/Provider。数据操作经明确端口，运行引擎通过适配器接 checkpoint；SQLAlchemy Session 不跨并发任务共享。
 

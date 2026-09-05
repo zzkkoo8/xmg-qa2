@@ -1,6 +1,6 @@
 # xmg-qa2 架构基线
 
-版本：1.0；日期：2026-09-05；状态：设计完成，Pre-Implementation。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
+版本：1.1；日期：2026-09-05；状态：设计完成，Pre-Implementation。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
 
 ## 1. 架构决定
 
@@ -28,7 +28,7 @@ flowchart TD
 
 一个代码库可使用相同构建镜像启动 api、worker、dispatcher、dingtalk 四类进程；不是四个独立微服务项目。业务表与检查点可共用 PostgreSQL 实例，但使用独立 schema 和迁移责任。
 
-最小部署服务：API、Worker、Dispatcher、DingTalk Adapter、PostgreSQL、RabbitMQ。简易 Web 静态资源由 API 提供。Dify/模型是已有外部依赖，不能把它们的资源成本遗漏后宣称“全栈轻量”。
+最小业务服务：API、Worker、Dispatcher、DingTalk Adapter、PostgreSQL、RabbitMQ。Chat/Admin 静态资源随应用镜像由 API 提供；发布时有 HTTPS 入口（可复用已有网关），默认本地认证，组织身份网关可选。Dify/模型是已有外部依赖，不能遗漏这些资源后宣称“全栈轻量”。
 
 ## 3. 技术组件与职责
 
@@ -45,9 +45,13 @@ flowchart TD
 | 配置 | YAML/JSON + Pydantic/JSON Schema | 声明阶段、优先级、条件、限制和版本；禁止 eval/任意导入 |
 | 观测 | OpenTelemetry + 结构化日志 + 业务审计事件 | 可复用已有后端；Langfuse 为可选 profile，不阻断主流程 |
 | 评测 | pytest + 人工标注题集；Ragas 可选离线依赖 | 确定性安全/恢复门禁优先，模型打分仅辅助 |
-| Web | 简易 TypeScript/React + Vite 任务页 | 对话、任务、补充、报告；复用 API 鉴权，不做流程编辑器 |
+| Web | React/TypeScript/Vite、Tailwind/shadcn、TanStack、assistant-ui | Chat/Admin 同一 SPA；自有 Task API、生成客户端；不做拖拽编辑器 |
+| 身份 | pwdlib/Argon2、PyJWT、本地账户与可撤销会话；组织身份可选 | 后端 RBAC + Case ACL；Admin 不自动获得客户数据或生产写权限 |
+| 模板 | TemplateProvider、受限 Jinja、nh3 | 安全 HTML/Markdown、主题与版本发布；不能执行任意代码 |
 
 当前未创建运行时代码、依赖锁文件或 Compose 部署文件；上述是实施选型，不是已部署状态。
+
+双面板交互/API 见 [Web Console](WEB-CONSOLE.md)；模板与 UI 扩展见 [Presentation Contract](PRESENTATION-CONTRACT.md)；开发、打包、离线与升级回退见 [Distribution](DISTRIBUTION-DEPLOYMENT.md)。
 
 ## 4. 状态归属与可靠性
 

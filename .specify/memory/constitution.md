@@ -1,6 +1,6 @@
 # xmg-qa2 Constitution
 
-Version: 1.0.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-05
+Version: 1.1.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-05
 
 授权来源：用户已确认 Q1–9，并于 2026-09-05 授权剩余问题采用最佳方案、审计修订设计并推送。本文由未填写模板形成项目宪法；此授权不包含业务编码、部署或生产目标变更。
 
@@ -46,6 +46,12 @@ Channel、Knowledge、Model、Tool、Policy 经稳定契约；Provider 私有类
 
 关联 task_id、run_id、turn_id、operation_id、trace_id、版本、耗时、重试、证据和结果。记录必要的决策摘要，不要求或保存模型隐藏思维链。usage/cost 不可用则明确标记，不伪造 0。未运行的测试、部署、真实连接不得报告成功。
 
+## XI. 双面板、可交付与个性化
+
+用户追加要求 V1 提供 Chat/Admin、便捷打包部署和 HTML/MD 模板。使用统一 React 前端和既有 Task API；Admin 操作本系统配置，不突破目标只读与 Case 数据权限。模板/主题可版本化发布，代码插件/交互页面须构建与审核。默认最小本地认证复用成熟组件，组织身份可接入；不自研认证算法或通用身份平台。
+
+开发/构建与目标部署分开；从第一 Feature 建基础打包，发布交付完整在线/离线包、镜像清单、健康/迁移/备份回退。没有实际通过对应平台与恢复测试，不承诺支持、一键安装或可无损回退。具体边界见 ADR-0007。
+
 ## 开发与 Git 治理
 
 - 使用标准 Git；允许标准 linked worktree 的 .git 文件，禁止自造 .git-data 替代。
@@ -61,3 +67,5 @@ Channel、Knowledge、Model、Tool、Policy 经稳定契约；Provider 私有类
 宪法变更必须说明来源、影响、对应 ADR/需求与迁移，同步 AGENTS、Architecture、Workflow、Contracts 和门禁；破坏性范围提高主版本，兼容增补提高次版本，澄清提高补丁版本。遵守当次用户明确授权，不虚构已批准状态。
 
 本次同步：替换空模板；落实只读、持久任务、配置能力、真实 V1、开源复用和外发边界。未开放 Coding Gate。后续实施状态见 docs/governance/DEVELOPMENT-GATES.md。
+
+1.1.0 增补来源：用户本轮五项 Web/分发/扩展/编码准备审计要求；对应 ADR-0007 和需求 FR13–17。同步 Web、Presentation、Distribution、交付路线与门禁；此设计增补不冒充 Feature spec/plan/analyze 已执行。

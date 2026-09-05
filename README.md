@@ -2,7 +2,7 @@
 
 面向企业技术支持的只读调查 Agent：理解问题，融合产品知识与通用技术，调用获准的 API/MCP/工具验证，必要时请求工程师补充，跨天恢复同一任务，输出有依据的答案与报告。
 
-当前状态：**2026-09-05 需求与架构基线已形成；业务代码尚未实现，未授权进入 implement。**
+当前状态：**2026-09-05 需求 1.1 与架构补全；包含 Chat/Admin、分发与模板设计。业务代码尚未实现，首个 Feature 门禁尚待执行。**
 
 ## 先读这几份
 
@@ -17,14 +17,21 @@
 | [知识契约](docs/architecture/KNOWLEDGE-CONTRACT.md) / [插件契约](docs/architecture/PLUGIN-CONTRACT.md) | Provider、Evidence、权限和扩展 |
 | [V1 交付计划](docs/plans/V1-DELIVERY-PLAN.md) | 多 Feature 交付顺序、具体产物与验收 |
 | [开发门禁](docs/governance/DEVELOPMENT-GATES.md) | 设计、编码、验证与发布状态 |
+| [Chat/Admin](docs/architecture/WEB-CONSOLE.md) | Web 组件、页面、认证权限与事件恢复 |
+| [分发部署](docs/architecture/DISTRIBUTION-DEPLOYMENT.md) | 开发/构建、在线/离线包、安装升级与回退 |
+| [模板与展示扩展](docs/architecture/PRESENTATION-CONTRACT.md) | HTML/MD、主题、UI 插件与安全边界 |
+| [本轮 Web/交付审计](docs/research/2026-09-05-WEB-DELIVERY-AUDIT.md) | 五项问题的结论、开源复用与官方依据 |
+| [编码就绪与 Codex 交接](docs/plans/IMPLEMENTATION-READINESS.md) | 实际缺口、第一 Feature 范围、可直接发送的执行提示词 |
 
 ## V1 必须真正可用
 
-真实钉钉入口 + REST/简易 Web → 持久 SupportTask → 真实 xmg-kb/模型 → 必要的只读检索或 API/MCP → 人工补充与恢复 → 证据化答案/Markdown 报告。
+真实钉钉入口 + REST/Chat → 持久 SupportTask → 真实 xmg-kb/模型 → 必要的只读检索或 API/MCP → 人工补充与恢复 → 证据化答案/MD 与安全 HTML 报告。Admin 配置能力、工作流、账号权限、模板与主题；最终提供经过验证的在线/离线部署包。
 
 V1 分为多个小 Feature，最后做联合验收。Fake Provider 是测试工具，不能代替真实闭环。
 
 技术路线：Python、FastAPI、Pydantic、LangGraph、PostgreSQL、Celery/RabbitMQ、Dify Knowledge Adapter、官方 MCP SDK、OpenTelemetry；V1 Docker Compose。LiteLLM/Langfuse 等按需启用。
+
+Web 路线：React/TypeScript/Vite + Tailwind/shadcn + TanStack；聊天优先 assistant-ui，选择性复用 FastAPI 官方全栈模板与 Admin 布局。发布使用预构建静态资源，目标服务器不需 Node/pnpm。
 
 ## 核心边界
 

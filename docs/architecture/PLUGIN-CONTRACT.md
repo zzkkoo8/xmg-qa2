@@ -4,7 +4,7 @@
 
 ## 1. 边界
 
-插件类型保持 channel、knowledge、model、tool、policy。Registry 是薄注册与适配层，负责能力发现、版本、健康和选择，不重建包管理器或任意代码市场。Workflow 配置单独由 Runtime 发布，Skill 是受审查的说明/资源包，不是拥有独立权限的第六个万能执行器。
+运行能力插件类型保持 channel、knowledge、model、tool、policy。Registry 是薄注册与适配层，负责能力发现、版本、健康和选择，不重建包管理器或任意代码市场。Workflow 配置单独由 Runtime 发布，Skill 是受审查的说明/资源包，不是拥有独立权限的第六个万能执行器。展示层另有 TemplateProvider 与构建期 UI 扩展清单，见 [Presentation Contract](PRESENTATION-CONTRACT.md)，二者不通过 Tool 获取执行权限。
 
 ## 2. Manifest 与调用
 
@@ -28,6 +28,8 @@
 discover → schema/version validation → initialize → ready → invoke → health → shutdown。初始化失败隔离；运行中 Provider 故障不影响其他无关插件。应用 composition root 唯一选择具体实现并注入 Contract，Workflow 不出现按 Dify/厂商字符串分支的业务代码。
 
 普通内部 Adapter 随应用构建、固定依赖版本；不可信或有系统执行能力的插件必须独立进程/容器。V1 不承诺热安装任意外部 Python 包。
+
+Admin 可启停已审核能力、编辑连接配置和健康测试；新增插件代码需合约测试与重新构建。发布保持兼容版本/hash，进行中 Case 固定语义版本；但当前 ACL/凭证撤销/能力禁用每次调用重新生效。更换表单布局、HTML/MD 模板不修改 Core；新增节点/API/业务规则仍需 Feature，禁止把“可扩展”宣传为所有功能都零代码。
 
 ## 4. MCP 与 Skill
 

@@ -70,6 +70,8 @@ when 只引用注册的条件谓词，不接受 Python 表达式、shell、动�
 
 配置可改变能力优先级/允许条件，不得配置解除 production_write=DENY。新状态转移/新节点语义是代码和 Contract 变更，需要独立 Feature/ADR。配置发布时固定 config_hash；进行中 Case 不自动使用新配置。
 
+Admin 提供表单和 YAML/JSON 编辑、差异、validate、publish、rollback；仍不做拖拽图编辑器。发布验证引用的能力/模板版本、Schema 与组织策略；草稿不能直接生效。当前权限撤销、禁用能力等收紧策略在下一次调用前立即检查，不能因 Case 固定旧配置而绕过。具体控制面见 [Web Console](WEB-CONSOLE.md)。
+
 ## 3. 证据门禁
 
 1. 识别待回答命题：产品官方支持、现场状态、通用机制、根因假设、操作建议。
