@@ -1,47 +1,20 @@
-xmg-qa2/
-  .gitignore
-  AGENTS.md
-  README.md
-  XMG-QA2-PROJECT-BASELINE.md
+xmg-qa2
+  README.md                         项目入口
+  AGENTS.md                         AI 开发约束
+  XMG-QA2-PROJECT-BASELINE.md         精简状态
+  .specify/                         官方 Spec Kit 与宪法/Git 配置
+  .agents/skills/                   官方生成的 Spec Kit skills
   docs/
-    BOOTSTRAP.md
-    governance/
-      DEVELOPMENT-GATES.md
-      SPECKIT-WORKFLOW.md
-      TEST-STRATEGY.md
-    adr/
-      ADR-0001-XMG-HARNESS-LANGGRAPH.md
-      ADR-0002-KNOWLEDGE-DECOUPLING.md
-      ADR-0003-WORKFLOW-FIRST.md
-      README.md
-    architecture/
-      ARCHITECTURE-BASELINE.md
-      DEPENDENCY-RULES.md
-      KNOWLEDGE-CONTRACT.md
-      PLUGIN-CONTRACT.md
-      SESSION-EVENT-MODEL.md
-      WORKFLOW-MODEL.md
-  specs/
-    README.md
-  src/
-    xmg_qa2/
-      api/
-      workflows/
-      domain/
-      infrastructure/
-      runtime/
-      harness/
-        registry/
-        contracts/
-      plugins/
-        tools/
-        knowledge/
-        channels/
-        models/
-        policies/
-      observability/
-  tests/
-    unit/
-    e2e/
-    contract/
-    integration/
+    requirements/                   唯一产品需求基线
+    research/                       开源组件与架构审计
+    design/                         人类可读产品设计
+    architecture/                   架构、状态、工作流、契约与依赖
+    adr/                            长期技术决策
+    plans/                          V1 分阶段交付路线
+    governance/                     门禁、Spec Kit 与测试策略
+    BOOTSTRAP.md                    历史初始化记录
+  specs/                            官方 Feature 规格（当前仅说明）
+  src/xmg_qa2/                      业务目录占位，尚无运行时代码
+  tests/                            测试目录占位，尚无业务测试
+
+这里只描述实际目录，不代表已实现的业务模块。

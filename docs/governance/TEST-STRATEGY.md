@@ -1,98 +1,33 @@
-# Test Strategy
+# 测试与评测策略
 
-## 1. 测试目标
+## 1. 先验证风险和边界
 
-主要验证“边界和流程”，而不仅是函数覆盖率。
+| 层 | 核心场景 | 证据 |
+| --- | --- | --- |
+| Unit | 状态转移、ACL、预算、命题类别、错误分类、模型动作 Schema | 不连外部系统的确定性测试 |
+| Contract | Fake 与真实 Adapter 同约束；知识 scope、模型能力、工具权限、渠道回执 | 同一合约测试套件，可标记实际 Provider 限制 |
+| Workflow | 内部优先、证据不足升级、冲突、无进展、取消、人工请求 | 节点/状态/事件与下一步判断 |
+| Integration | PG/checkpointer/Celery/broker；发布与恢复崩溃窗口 | 实际进程重启/消息重投、唯一键和事件记录 |
+| E2E | 钉钉 + 真实 KB/模型/只读能力 + 人工补充 + Web/报告 | 完整 task_id 链路；不能只用 TestProvider |
+| Evaluation | 真实中文产品标注集、版本/现场/通用技术问题 | 支持关系、正确升级、费用与延迟，工程师复核 |
+| Operations | Compose、迁移、备份恢复、升级/旧图回退 | 可复现运行命令、环境版本、输出与失败说明 |
 
-## 2. Unit Tests
+## 2. 必须覆盖的故障
 
-验证：
+401/403、429、5xx、网络不可达、非法 Schema、空知识、冲突证据、恶意文档指令、敏感外发、同案双 Worker、重复入站/出站/恢复、Worker 强杀、图/业务双写间隙、旧图版本、通知回执丢失、部分人类回传、取消中的工具请求、资源上限与无进展循环。
 
-- domain models。
-- policy rules。
-- error mapping。
-- deterministic workflow helpers。
-- normalization。
+集成测试必须验证 checkpoint 写入也受有效执行者约束，不能只验证业务表租约。禁止声称外部副作用 exactly-once。
 
-不得依赖真实外部服务。
+人工恢复需故障注入覆盖 ResumeAttempt 接收后/图消费后/业务回执前，并推进到第二个 interrupt 再重复投递旧回复：验证定向恢复、消费对账与不确定状态暂停，旧回复不得满足新的等待条件。
 
-## 3. Contract Tests
+## 3. 测量口径
 
-这是插件架构的核心。
+以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)第 5 节和[联合验收](../plans/V1-DELIVERY-PLAN.md)为准；所有数值为待测目标。记录硬件、依赖版本、样本数、并发、p50/p95、失败率、provider 时延与费用，不用纯 Fake 结果推算生产性能。
 
-同一套 Knowledge Contract Test 应能运行于：
+不少于 100 个人工标注案例，冻结回归集；确定性安全和数据隔离场景零失败。引用覆盖不等于引用正确；Ragas/LLM 评分辅助人工复核，不单独决定上线。
 
-- Fake Provider。
-- Dify Adapter。
-- RAGFlow Adapter。
-- Future Provider。
+## 4. 本轮文档变更的验证
 
-同一套 Model Contract Test 同理。
+本轮仅验证 Markdown 结构/本地链接、YAML 示例和 Git 配置、分支命名 dry-run、需求/权限/状态/引用的一致性及 git diff。没有运行代码时不创建镜像实现的空测试，不报告 Unit/E2E/部署已通过。
 
-## 4. Workflow Tests
-
-使用 fake plugins 对状态图进行确定性测试：
-
-- happy path。
-- no evidence。
-- provider timeout。
-- provider unavailable。
-- invalid schema。
-- verification failure。
-- retry exhausted。
-
-验证实际状态转移，不只验证最终文本。
-
-## 5. Integration Tests
-
-验证真实技术组合，例如：
-
-```text
-FastAPI + Harness + LangGraph + Test Provider
-```
-
-以及后续：
-
-```text
-Harness + Dify
-Harness + DingTalk sandbox
-```
-
-## 6. E2E
-
-从入口开始：
-
-```text
-Channel/API
- -> Thread/Turn
- -> Workflow
- -> Knowledge
- -> Model
- -> Verification
- -> Response
-```
-
-同时检查 Trace。
-
-## 7. Failure Injection
-
-必须主动测试：
-
-- timeout。
-- 429。
-- 5xx。
-- malformed response。
-- empty evidence。
-- duplicate channel delivery。
-- model invalid structured output。
-
-## 8. 性能
-
-V1 在 Feature Spec 中冻结：
-
-- p50/p95 latency。
-- provider timeout。
-- max workflow duration。
-- max retries。
-
-未冻结指标前，不在本文编造数字。
+每个实现 Feature 只运行必要相关测试及规定门禁；发现具体风险再扩大范围，避免无意义重复测试。

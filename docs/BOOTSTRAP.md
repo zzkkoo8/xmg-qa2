@@ -1,4 +1,6 @@
-# xmg-qa2 Bootstrap Guide
+# xmg-qa2 Bootstrap Guide（历史初始化记录）
+
+> 本文记录 2026-08-28 的初始化流程与当时版本，不是当前仓库的续接步骤。仓库已初始化，Constitution 已于 2026-09-05 形成设计基线；不要重跑 init、覆盖现有配置或重复生成宪法。后续按 [当前 Spec Kit 流程](governance/SPECKIT-WORKFLOW.md) 和 [交付计划](plans/V1-DELIVERY-PLAN.md) 进入新 Feature。历史命令未在本轮重新验证。
 
 ## 目的
 

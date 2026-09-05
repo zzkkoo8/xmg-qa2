@@ -1,185 +1,40 @@
-# SpecKit Workflow for xmg-qa2
+# Spec Kit 工作流
 
-## 1. 采用 Full Path
+## 1. 唯一路径
 
-xmg-qa2 是生产级架构项目，不采用 Spec Kit 的短流程。
+constitution → specify → clarify → plan → checklist → tasks → analyze → 明确编码授权 → implement → converge。
 
-固定顺序：
+规格通过仓库已有官方 Spec Kit skills/脚本生成；不手工伪造 Feature 产物，不重新初始化现有仓库，不重写 vendored skills 和脚本。需求与设计可以先行，但不能代替运行时 Feature 的完整门禁。
 
-```text
-constitution
- -> specify
- -> clarify
- -> plan
- -> checklist
- -> tasks
- -> analyze
- -> HUMAN GATE
- -> implement
- -> converge
-```
+## 2. 本轮需求输入
 
-## 2. Gate 0：Architecture Baseline
+读取[需求基线](../requirements/REQUIREMENTS-BASELINE.md)、[架构](../architecture/ARCHITECTURE-BASELINE.md)、相关 Contracts/ADR 和[交付路线](../plans/V1-DELIVERY-PLAN.md)。Q1–9 已确认，余项由用户授权采用文档默认方案；不要再次逐题访谈。
 
-已经确认的方向：
+V1 为真实业务闭环。首个运行时 Feature 可以用 Fake 验证状态与恢复，但后续真实 KB/模型、只读能力、钉钉/Web 和联合验收均属于 V1 内部里程碑。
 
-- XMG Harness。
-- LangGraph 作为 Workflow Runtime。
-- Workflow First。
-- Provider Plugin Architecture。
-- Knowledge Project 与 QA Runtime 解耦。
-- SpecKit before code。
+## 3. 分支
 
-Gate 0 不代表可以直接写代码。
+一项 Feature 一个 feature/<number>-<slug> 分支；编号在创建时检查远端、已有分支和 specs。现有 Git extension 的 branch_template 固定为 feature/{number}-{slug}，branch_prefix 留空，避免双前缀。使用 before_specify → speckit.git.feature 挂钩，不在 main 创建业务变更。
 
-## 3. Constitution
+本轮 feature/002-support-agent-baseline 是架构/治理文档修订，未创建或伪称运行时 spec。003 起的实现编号只是路线图建议。
 
-Constitution 应吸收以下硬原则：
+## 4. 各步骤要解决什么
 
-- Workflow First。
-- External Capability via Contract。
-- Knowledge Independence。
-- Evidence First。
-- Provider Neutral。
-- Observable by Default。
-- Deterministic Where Possible。
-- Dependency Direction Enforcement。
-- Spec Before Code。
-- Evidence-based Completion。
+| 步骤 | 关键产物/检查 |
+| --- | --- |
+| Constitution | 当前项目原则；需求来源、只读边界、持久任务、开源复用和证据要求 |
+| Specify | 一项可交付 Feature；用户场景、FR/NFR、验收、非目标 |
+| Clarify | 仅解决真实缺口；权限、持久化、外部接入、通知和恢复语义不可含糊 |
+| Plan | 包/镜像版本、接口、数据迁移、模块、错误、测试、SLO、回退 |
+| Checklist | 架构、安全、Evidence、恢复、观测、测试、运维 |
+| Tasks | 依赖顺序明确、可独立验证的小任务 |
+| Analyze | Spec/Plan/Tasks/Constitution 一致性；0 Critical/0 High |
+| Human Gate | 展示具体产物和验证结果后，由用户明确批准当前 Feature 编码 |
+| Implement | 按 Task 实现，变更与证据一并记录 |
+| Converge | Spec/Plan/Tasks/Code/Tests 对照；不可只改文档掩盖代码偏差 |
 
-## 4. Specify
+## 5. 验证边界
 
-第一个 Feature 不建议描述“整个 xmg-qa2”。
+脚本 paths-only 或 branch dry-run 成功只证明路径/分支命名，不证明 Analyze 或业务测试通过。Fake 测试只证明受测边界，真实 Provider 合同与 E2E 仍需独立记录。
 
-应拆为可交付 Feature。
-
-推荐起点：
-
-```text
-001-core-harness-product-qa
-```
-
-包含：
-
-- canonical request/response。
-- Thread/Turn。
-- plugin contracts。
-- registry。
-- Product QA baseline workflow。
-- fake/in-memory providers for test。
-- observability baseline。
-
-DingTalk 和真实 Knowledge Provider 可作为后续 Feature，避免首个 Spec 过大。
-
-## 5. Clarify
-
-重点消除：
-
-- Provider failover 的明确行为。
-- Session persistence。
-- Evidence threshold。
-- Citation 输出要求。
-- API sync/stream 行为。
-- timeout。
-- retry。
-- knowledge version。
-- multi-tenant 是否进入 V1。
-
-不能用 “TBD” 穿过 Gate。
-
-## 6. Plan
-
-Plan 必须明确：
-
-- 模块边界。
-- package layout。
-- LangGraph 使用边界。
-- persistence。
-- dependency rules。
-- test pyramid。
-- OpenTelemetry。
-- config/secrets。
-- error model。
-
-## 7. Checklist
-
-至少包括：
-
-- Architecture
-- Security
-- Knowledge Contract
-- Observability
-- Testing
-- Operations
-- Rollback
-
-## 8. Tasks
-
-Task 必须足够小到：
-
-- 可单独实现。
-- 可单独测试。
-- 可明确验收。
-- 失败时能定位到单一边界。
-
-## 9. Analyze
-
-进入实现前必须：
-
-```text
-0 Critical
-0 High
-```
-
-Medium 必须明确：
-
-- 接受。
-- 延后。
-- 或修正。
-
-不能静默忽略。
-
-## 10. Human Gate
-
-Agent 在 Analyze 完成后必须停止并向用户给出：
-
-- 规格摘要。
-- 计划摘要。
-- 关键技术选择。
-- 未解决风险。
-- Analyze 结果。
-
-用户明确说“批准实现”后，才进入 implement。
-
-## 11. Implement
-
-只能按 tasks.md 实施。
-
-遇到架构冲突：
-
-- 不现场发明新架构。
-- 返回 Plan / ADR。
-- 重新 Analyze。
-
-## 12. Converge
-
-实现后检查：
-
-```text
-Spec
-vs
-Plan
-vs
-Tasks
-vs
-Code
-vs
-Tests
-```
-
-发现 drift 必须：
-
-- 补代码。
-- 或补规格并重新审批。
-
-不能只修改文档掩盖代码偏差。
+长任务的失败、卡顿、人工补充与跨天恢复是 V1 验收必需项；不以普通同步聊天 E2E 代替。

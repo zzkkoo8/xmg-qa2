@@ -1,6 +1,6 @@
 # AGENTS.md — xmg-qa2 AI 开发约束
 
-本文件对 Codex 及其他 AI Coding Agent 生效。
+本文件对 Codex 及其他 AI Coding Agent 生效。当前需求入口为 [需求基线](docs/requirements/REQUIREMENTS-BASELINE.md)，状态见 [开发门禁](docs/governance/DEVELOPMENT-GATES.md)。
 
 ## 1. 总原则
 
@@ -75,9 +75,7 @@ xmg-qa2 只消费 Knowledge Contract。
 
 ### 3.4 依赖方向
 
-原则性方向：
-
-`domain <- harness contracts <- workflows/runtime <- plugins/infrastructure <- api/channel`
+依赖采用端口与适配器，按 [Dependency Rules](docs/architecture/DEPENDENCY-RULES.md) 的矩阵执行；composition root 装配具体实现，禁止循环依赖。
 
 强制规则：
 
@@ -100,16 +98,7 @@ xmg-qa2 只消费 Knowledge Contract。
 
 ## 4. Evidence First
 
-知识问答必须保留统一 Evidence：
-
-- source
-- document_id
-- chunk_id
-- title
-- content
-- score
-- metadata
-- knowledge_version
+知识、网页、API 和现场观察统一使用 [Knowledge Contract](docs/architecture/KNOWLEDGE-CONTRACT.md) 的 Evidence 定义；字段名称、适用范围、可空规则与版本语义以该契约为准。至少保留真实出处、内容引用/摘录、采集时间、授权范围及命题支持关系；非文档证据不伪造 document_id/chunk_id，retrieval_score 不等于事实置信度。
 
 无证据或证据不足时，Workflow 必须进入明确定义的 fallback，不得编造答案。
 
@@ -117,6 +106,7 @@ xmg-qa2 只消费 Knowledge Contract。
 
 每个 Turn 至少应可关联：
 
+- task_id / run_id / operation_id
 - trace_id
 - thread_id
 - turn_id
@@ -130,14 +120,14 @@ xmg-qa2 只消费 Knowledge Contract。
 - evidence ids
 - final outcome
 
-不得把 Prompt、Token、检索、错误原因隐藏在无法审计的黑盒里。
+记录模型/提示词版本、调用量、检索和错误分类；默认不导出原始 Prompt/客户日志，不保存隐藏思维链。必要审计内容按 case 权限和保留策略访问。
 
 ## 6. Git 规范
 
-- 必须使用标准 `.git/`。
+- 必须使用标准 Git；常规仓库为 `.git/`，标准 linked worktree 的 `.git` 文件同样有效。
 - 禁止创建 `.git-data` 等非标准替代仓库，除非用户明确批准且有 ADR。
 - 开始任何 Feature 前确认 `git status`。
-- 一项 Feature 一个 Spec Kit Feature 分支。
+- 一项 Feature 一个 Spec Kit Feature 分支：`feature/<number>-<slug>`。
 - 不在 `main` 上直接开发。
 - 变更前确保已有可回退提交。
 - 不使用 `git reset --hard`、`git clean -fdx` 等破坏性命令，除非用户明确批准。
@@ -167,3 +157,15 @@ xmg-qa2 只消费 Knowledge Contract。
 - Git commit（进入正式实现阶段后）。
 
 “代码已写完”不等于完成。
+
+
+## 9. 本轮固定的产品边界
+
+- V1 是真实 KB/模型、钉钉、只读能力、人工恢复和报告的垂直闭环；Fake 只用于测试。
+- SupportTask 高于 Thread/Turn；等待须持久保存并释放 Worker，恢复验证 case/request/version/ACL。
+- 客户目标仅 READ_ONLY；WRITE/UNKNOWN、任意 shell/未审核脚本默认拒绝。人工“批准/继续”不解锁生产写。
+- 模型可提供通用知识、假设与建议，不伪造产品/现场证据；动态裁决遵守命题类型、版本和时效。
+- 所有外发点执行数据策略；包括公开搜索、模型、embedding/rerank、MCP 参数与遥测。
+- 本系统任务/报告写入和授权渠道通知允许通过明确 system_effect 执行，不与客户目标写权限混淆。
+- 优先成熟开源；核心只实现支持领域规则，不堆叠多个 Agent 框架或知识入库系统。
+- 用户已授权本轮设计修订与推送；不因此推断业务编码、合并主分支或部署授权。

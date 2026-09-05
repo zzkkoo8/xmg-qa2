@@ -1,91 +1,19 @@
-# Development Gates
+# 开发门禁
 
-## Gate 0 — Architecture Direction
+状态日期：2026-09-05。状态必须以实际产物和授权为准，不把“设计完成”写成“可以编码”。
 
-通过条件：
+| Gate | 通过条件 | 当前状态 |
+| --- | --- | --- |
+| 0 需求/架构方向 | 已知需求、默认项及取舍有来源；用户授权形成设计 | 本轮完成设计修订；Q1–9 明确，默认项见需求基线 |
+| 1 Constitution | 与当前需求一致，无占位符/冲突，授权可追溯 | 本轮依据设计授权形成 1.0.0；不自动开放编码 |
+| 2 Feature Spec | 官方 Spec Kit 生成，场景/FR/NFR/非目标明确，关键歧义解决 | 运行时 Feature 尚未创建 |
+| 3 Plan/Checklist/Tasks | 模块/版本/Schema/错误/安全/测试/回退齐全，任务可执行 | 仅有产品交付路线；尚无获批运行时 Feature Plan |
+| 4 Analyze | Critical=0、High=0；Medium 有决定；Checklist 无阻塞 | 本轮文档自审不冒充 Spec Kit Analyze；运行时门禁未通过 |
+| 5 Coding Authorization | 用户明确批准对应 Feature 实现 | 未授权 |
+| 6 Task Verification | 最小相关验证、真实输出、变更范围、关联需求 | 无业务代码，暂不适用 |
+| 7 Integration | 真实 KB/模型/钉钉/只读能力 + 持久恢复和失败测试 | 未执行 |
+| 8 V1 Acceptance | 完整真实闭环、SLO/安全/回退、converge 与用户验收 | 未执行 |
 
-- 项目定位明确。
-- Harness / Workflow / Plugin / Knowledge 边界明确。
-- 技术路线得到人工批准。
+设计授权允许读取、研究、修订文档、ADR、必要 Git 治理配置与推送，不授权业务实现或生产操作。不伪造 spec/plan/tasks 文件以绕过命令；文档审计发现关闭也不代表运行时缺陷已修复。
 
-当前状态：**Approved**
-
-## Gate 1 — Constitution
-
-通过条件：
-
-- Constitution 与 Architecture Baseline 一致。
-- 无相互矛盾规则。
-- 明确禁止提前编码。
-- 人工批准。
-
-## Gate 2 — Feature Specification
-
-通过条件：
-
-- 明确 User Scenarios。
-- 明确 Functional Requirements。
-- 明确 Non-Functional Requirements。
-- 明确 Out of Scope。
-- 所有 Critical ambiguity 已 clarify。
-- 人工批准。
-
-## Gate 3 — Implementation Plan
-
-通过条件：
-
-- 模块边界明确。
-- Contracts 明确。
-- Data/State model 明确。
-- Error model 明确。
-- Observability 明确。
-- Test strategy 明确。
-- Migration/rollback 明确。
-- 人工批准。
-
-## Gate 4 — Analyze
-
-通过条件：
-
-- 0 Critical。
-- 0 High。
-- Medium 有处理决定。
-- Checklist 无 blocker。
-- Tasks 可执行。
-
-## Gate 5 — Coding Authorization
-
-必须由用户明确批准。
-
-Agent 不得根据“前面已经同意架构”推断获得编码授权。
-
-## Gate 6 — Task Verification
-
-每个 Task 完成必须有：
-
-- 自动化测试。
-- 命令输出。
-- git diff review。
-- 无新增未解释 warning。
-- 关联 Spec requirement。
-
-## Gate 7 — Integration
-
-通过：
-
-- contract tests。
-- integration tests。
-- workflow tests。
-- provider failure tests。
-- observability checks。
-
-## Gate 8 — Acceptance
-
-通过：
-
-- E2E。
-- 性能基线。
-- 故障降级。
-- rollback。
-- SpecKit converge。
-- 用户验收。
+涉及代码的新范围，仍遵守 AGENTS.md 和每 Feature 明确授权。仓库同步与合并按用户当次授权执行；本次仅推送设计分支并提供可审阅 PR。
