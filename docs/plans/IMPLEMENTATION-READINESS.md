@@ -4,11 +4,11 @@
 
 ## 1. 当前结论
 
-首个运行时 Feature `feature/003-support-foundation` 已由经用户授权的 GitHub Agent 完成完整设计门禁，当前状态：
+首个运行时 Feature `003-support-foundation` 已由经用户授权的 GitHub Agent 完成完整设计门禁，当前状态：
 
-**READY FOR CODEX IMPLEMENTATION**
+**READY FOR CODEX IMPLEMENTATION AFTER DESIGN MERGE**
 
-事实源：GitHub 已提交的 `feature/003-support-foundation`。开发机旧的未提交文件、stash、`001-core-harness-product-qa` 及旧会话记忆均不再作为项目事实。
+当前物理设计来源仍在 `feature/003-support-foundation`，但用户已经决定先把 PR #2/#3 合并到 `main`、清理非 main 远端分支，再让开发机以合并后的 `origin/main` 为唯一设计事实源。
 
 本结论仅开放 `support-foundation` Feature 编码，不代表完整 V1、生产部署或真实外部 Provider 已验收。
 
@@ -31,7 +31,7 @@ Feature 目录：[`specs/003-support-foundation/`](../../specs/003-support-found
 - `analyze.md`：Critical=0、High=0；
 - `CODING-READINESS.md`：Codex 同步、权限、停止条件和第一个 Task。
 
-Constitution 已升级至 1.3.0，AGENTS/Spec Kit Workflow/Development Gates 已同步 GitHub-Agent 设计模式。
+Constitution 已升级至 1.3.0，AGENTS/Spec Kit Workflow/Development Gates 已同步 GitHub-Agent 设计模式和 main-first 合并后交接模式。
 
 ## 3. 当前 Feature 实现范围
 
@@ -64,11 +64,37 @@ Fake Model/Knowledge/Tool 仅用于可重复控制测试。
 
 因此 Foundation 完成不能宣称 V1 或企业生产发布完成。
 
-## 5. Codex 开工入口
+## 5. 合并与 Codex 开工入口
 
-Codex 不再重新执行一遍 `$speckit-specify → plan → tasks`。
+先完成设计收敛：
 
-先读取：
+1. PR #2 使用 merge commit 合并到 `main`；
+2. PR #3 retarget 到 `main` 并复核只剩 003 设计差异；
+3. PR #3 使用 merge commit 合并；
+4. 删除已合并/废弃的非 main 远端分支；
+5. 合并后的 `origin/main` 成为唯一权威设计基线。
+
+随后开发机先执行：
+
+```bash
+git fetch origin --prune
+git switch main
+git reset --hard origin/main
+git clean -fd
+git status
+git rev-parse HEAD
+git rev-parse origin/main
+```
+
+两个 SHA 必须一致，工作区必须 clean。禁止 `git clean -fdx`。
+
+然后创建实现分支：
+
+```bash
+git switch -C feature/003-support-foundation main
+```
+
+Codex 不重新执行 `$speckit-specify → plan → tasks`，而是依次读取：
 
 1. `AGENTS.md`
 2. `.specify/memory/constitution.md`
@@ -77,7 +103,7 @@ Codex 不再重新执行一遍 `$speckit-specify → plan → tasks`。
 5. `specs/003-support-foundation/plan.md`
 6. `specs/003-support-foundation/tasks.md`
 
-随后按 `CODING-READINESS.md` 强制同步 GitHub 分支，并从 T001 开始开发。
+然后从 T001 开始开发。禁止直接在 main 编码。
 
 ## 6. 风险停止条件
 
@@ -93,6 +119,6 @@ Codex 不再重新执行一遍 `$speckit-specify → plan → tasks`。
 
 ## 7. 最终原则
 
-**GitHub 定义做什么，Codex 负责按 Tasks 实现并提供真实验证证据。**
+**main 定义已接受设计，Feature 分支承载实现，Codex 按 Tasks 实现并提供真实验证证据。**
 
 设计文件不能代替运行时证明；运行时实现也不能私自改变已确认的需求/安全边界。
