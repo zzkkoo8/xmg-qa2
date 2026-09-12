@@ -1,52 +1,98 @@
 # 编码就绪判断与开发机 Codex 交接
 
-更新：2026-09-07。结论：主要产品与架构边界足以让开发机 Codex 开始第一 Feature 的规格、版本验证和实现准备；仍有需在对应 Feature 冻结的安全与接口细节，当前不能报告“全部实施门禁通过”或“企业生产就绪”。审阅方案后推送不自动等同于授权所有 Feature 编码/部署。最新证据与分阶段关闭条件见[企业级开工审计](../research/2026-09-07-ENTERPRISE-READINESS-AUDIT.md)。
+更新：2026-09-12。
 
-## 1. 当前就绪矩阵
+## 1. 当前结论
 
-| 项目 | 当前证据 | 判断/下一动作 |
-| --- | --- | --- |
-| 需求与主要架构 | 需求 1.2、问答核心/评测、Web/分发/模板契约、ADR-0008 | 设计可交接，无需重新访谈 Q1–9 |
-| 插件/工作流/HTML/MD 个性化 | 已定义能力与 UI/模板边界、版本发布和验收 | 待对应 Feature 实现，不是现成可用功能 |
-| 第一 Feature spec/plan/checklist/tasks/analyze | `specs/` 当前仅说明，尚未生成运行时产物 | 开发机通过已安装 Spec Kit skills 完成，不能用本文件冒充 |
-| 构建版本与工具 | 没有锁文件或已验证 Dockerfile/Compose | 开发机检测实际环境，验证 Python/Node/包/数据库/checkpointer 组合后锁定 |
-| 第一 Feature 编码授权 | 本轮仅设计修订；下方是可发送的授权文本 | 用户把执行文本发给开发机后，按其明确范围及门禁实施 |
-| 真实接入资料 | Dify/模型/钉钉/产品端点未在此会话验证 | 只阻塞相应集成；不阻塞持久任务、UI 壳和合约测试 |
-| 发布包 | 尚无 OCI/在线/离线成品 | 先建立构建管线，最终 Feature 实测后交付 |
+首个运行时 Feature `feature/003-support-foundation` 已由经用户授权的 GitHub Agent 完成完整设计门禁，当前状态：
 
-主要差距是实现准备与验证，另有流式草稿内容检查、群聊完整受众授权两项设计边界待闭合。无需全局架构重写；按最新审计 A01–A09 纳入对应 Feature 的 Spec/Plan/Checklist。首个 Feature 完成不能宣称整体 V1 已完成。
+**READY FOR CODEX IMPLEMENTATION**
 
-## 2. 第一 Feature 的具体范围
+事实源：GitHub 已提交的 `feature/003-support-foundation`。开发机旧的未提交文件、stash、`001-core-harness-product-qa` 及旧会话记忆均不再作为项目事实。
 
-建议短名 `support-foundation`；编号由 Spec Kit 检查现有远端/规格后分配，不硬编码 003。基于已审查设计分支或其已合并的 main，新建独立运行时 Feature 分支，禁止在设计分支写业务实现。
+本结论仅开放 `support-foundation` Feature 编码，不代表完整 V1、生产部署或真实外部 Provider 已验收。
 
-- 验证并锁定 Python 3.12 候选、Node LTS/pnpm、React/Vite、FastAPI/Pydantic、PG/SQLAlchemy/psycopg、LangGraph/checkpointer 与 Celery/RabbitMQ 的可用组合。
-- 创建最小可运行包、OpenAPI、开发 Compose、基础 Dockerfile/CI；沿已存在目录落实文件，不再做空目录工程。
-- 建立 QuestionFrame/AnswerDraft/AnswerCheck 与显式路由/缺口/停止规则，至少 20 个合成控制场景和评测结果 Schema；具体语义以 QA Core 为准，不能用 Fake 证明答案质量。
-- 实现 SupportTask/Run/HumanRequest/ResumeAttempt、持久中断/定向恢复、幂等与关键崩溃窗口。
-- 建立同一 React SPA 的 Chat/Admin 路由壳、本地登录/角色与 Case 权限、任务输入/状态展示；本阶段不实现全部配置与模板编辑器。
-- Fake Knowledge/Model/Tool 仅用于可重复测试；PG/checkpointer/broker 必须是真实进程。提供 API 创建 → 等待 → 重启 → 回传 → 恢复 的可运行演示。
+## 2. 已完成的设计门禁
 
-具体表结构、OpenAPI、源码任务与安装版本由该 Feature Plan 冻结；调用失败时优先查兼容错误，不无限更换组件。确需改变核心选择则追加 ADR 并同步规格。
+Feature 目录：[`specs/003-support-foundation/`](../../specs/003-support-foundation/)
 
-## 3. 发给开发机 Codex 的执行提示词
+已完成：
 
-下面的文字由用户发送后才形成对应执行授权；当前保存文档不会自行启动编码，也不授权后续全部 Feature。
+- `spec.md`：用户场景、FR、非目标、成功标准；
+- `clarifications.md`：关键歧义关闭；
+- `research.md`：运行时、持久化、Harness、测试等实现决策；
+- `data-model.md`：SupportTask/Run/HumanRequest/ResumeAttempt/Evidence/Answer 等数据契约；
+- `contracts/provider-contracts.md`：Model/Knowledge/Tool/Policy/Registry 契约；
+- `contracts/openapi.yaml`：Foundation API 契约；
+- `plan.md`：源码布局、事务/恢复/API/Web/CI/安全实施计划；
+- `checklists/requirements.md`：需求质量 PASS；
+- `checklists/implementation.md`：编码前门禁 PASS，运行时项待实现验证；
+- `tasks.md`：T001-T013 可执行开发任务；
+- `analyze.md`：Critical=0、High=0；
+- `CODING-READINESS.md`：Codex 同步、权限、停止条件和第一个 Task。
 
-```text
-在现有 /data/dev/xmg-qa2 开发机仓库继续工作（目录不存在则定位现有克隆，不覆盖或重新初始化）。我授权你完成第一个 support-foundation Feature 的开发环境组件搭建、代码实现和测试；仅限开发/测试环境，不接管客户生产机、不执行生产写、不合并 main 或部署正式环境。
+Constitution 已升级至 1.3.0，AGENTS/Spec Kit Workflow/Development Gates 已同步 GitHub-Agent 设计模式。
 
-先检查 git status/远端，保护未提交内容，读取 AGENTS.md、Constitution、需求基线及 IMPLEMENTATION-READINESS.md。同步 feature/002-support-agent-baseline 最新设计；如果已合并，则用包含同等设计的 main；保留本地独有提交，禁止强制覆盖。通过仓库官方 Spec Kit skills 创建独立 Feature 分支及规格；按 specify→clarify→plan→checklist→tasks→analyze 完成门禁，复用已定决策，只询问实质阻塞。允许你完成这些准备，Analyze 无 Critical/High、Checklist 无阻塞后，当前 Feature 无需再次索要相同编码授权，直接 implement。
+## 3. 当前 Feature 实现范围
 
-范围按该文档第2节：问答理解/路由/答案检查骨架、20 个合成控制场景与评测结构、锁定并验证版本、持久任务/恢复、真实 PG/checkpointer/broker、React Chat/Admin 壳及最小本地认证/权限、开发 Compose/镜像/CI。优先成熟开源，复用组件但不整仓覆盖或引入第二套 Agent/数据库业务模型。测试覆盖问答路径/最小澄清/无进展以及恢复幂等、权限与实际进程故障；Fake 仅用于外部 Provider 测试。模型/KB等真实资料缺失只阻塞相关集成，不阻塞独立工作；若替换包源/模型，保持秘密和数据授权范围。
+`support-foundation` 交付第一套真正可运行的基础闭环：
 
-安装仅限项目虚拟环境、容器和明确缺少的开发依赖；不得覆盖其他项目的 Node/npm、升级共享 Docker 或擅改主机网络。遇环境/权限阻塞保存状态、说明证据及最小协助要求。完成后执行 converge、独立只读复核、相关测试，提交推送 Feature 分支和 PR，返回变更、验证、启动方法与剩余阻塞，不伪报 V1 已发布。
-```
+- Python/Node/容器依赖锁定和可复现构建；
+- QuestionFrame、AnswerDraft、AnswerCheck 及有界 QA Workflow；
+- Model/Knowledge/Tool/Policy Harness Contracts 与 Registry；
+- customer-target READ_ONLY/WRITE/UNKNOWN 硬边界；
+- SupportTask/Run/HumanRequest/ResumeAttempt 持久业务状态；
+- PostgreSQL + LangGraph PostgreSQL checkpoint + Celery/RabbitMQ 真实恢复/幂等验证；
+- 至少 20 个确定性问答/控制测试场景；
+- 最小认证、Case ACL、REST Task API；
+- React Chat/Admin 最小壳；
+- Docker/Compose、CI、结构化可观测性；
+- create → wait → restart → reply → resume → checked answer 的 Foundation E2E。
 
-首个 Feature 交付问答控制骨架，下一真实 KB/模型 Feature 必须交付[答案质量基线](../governance/ANSWER-QUALITY.md)，再扩展自主取证；不将完整 Admin/模板编辑器放到核心问答质量之前。
+Fake Model/Knowledge/Tool 仅用于可重复控制测试。
 
-## 4. 后续资料与停止点
+## 4. 后续 V1 但不属于当前 Feature 的内容
 
-真实接入需：Dify 地址/安装版本/授权 dataset、模型 endpoint/能力及数据范围、钉钉应用与收件映射、至少一种产品只读 API/MCP、脱敏测试题集。秘密仅从开发机既有配置/秘密引用取用，不要求写入公开仓库或聊天记录。
+完成 Foundation 后仍需独立 Feature 落地并真实验收：
 
-最终发布需：目标 OS/CPU、Docker/Compose、身份模式/管理员初始化、TLS、加密持久存储、镜像渠道及备份目标。每个 Feature 完成独立验收；上一阶段可用不能替代这些接入/发布条件。
+- Dify Knowledge/xmg-kb；
+- 真实模型与答案质量冻结题集；
+- 钉钉入口/出站通知；
+- 至少一种真实产品 READ_ONLY API/MCP 能力；
+- 完整 Admin/模板/插件管理体验；
+- 在线/离线发布包和目标 OS 回退/恢复实测。
+
+因此 Foundation 完成不能宣称 V1 或企业生产发布完成。
+
+## 5. Codex 开工入口
+
+Codex 不再重新执行一遍 `$speckit-specify → plan → tasks`。
+
+先读取：
+
+1. `AGENTS.md`
+2. `.specify/memory/constitution.md`
+3. `specs/003-support-foundation/CODING-READINESS.md`
+4. `specs/003-support-foundation/spec.md`
+5. `specs/003-support-foundation/plan.md`
+6. `specs/003-support-foundation/tasks.md`
+
+随后按 `CODING-READINESS.md` 强制同步 GitHub 分支，并从 T001 开始开发。
+
+## 6. 风险停止条件
+
+以下情况才停止对应 Task 并请求重新设计/ADR：
+
+- 既定核心组件组合经真实兼容测试不能工作，需要替换组件家族；
+- 无法实现 lease/state-version fencing 或 checkpoint/business-state 对账；
+- 实现必须突破客户目标只读边界；
+- 发现当前 spec/plan 的 Critical/High 矛盾；
+- 必须修改开发机其他项目或共享基础设施才能继续。
+
+普通代码错误、依赖小版本调整、测试失败属于 Codex 调试范围，不应重新启动整套需求访谈。
+
+## 7. 最终原则
+
+**GitHub 定义做什么，Codex 负责按 Tasks 实现并提供真实验证证据。**
+
+设计文件不能代替运行时证明；运行时实现也不能私自改变已确认的需求/安全边界。
