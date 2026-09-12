@@ -1,35 +1,46 @@
 # AGENTS.md — xmg-qa2 AI 开发约束
 
-本文件对 Codex 及其他 AI Coding Agent 生效。当前需求入口为 [需求基线](docs/requirements/REQUIREMENTS-BASELINE.md)，状态见 [开发门禁](docs/governance/DEVELOPMENT-GATES.md)。
+本文件对 Codex 及其他 AI Coding Agent 生效。当前需求入口为 [需求基线](docs/requirements/REQUIREMENTS-BASELINE.md)，状态见 [开发门禁](docs/governance/DEVELOPMENT-GATES.md)。GitHub 已提交分支是项目唯一协作事实源；本地开发机只是执行副本。
 
 ## 1. 总原则
 
 本项目采用 Spec-Driven Development。Agent 的职责不是“尽快写代码”，而是确保：
 
 1. 需求有明确来源。
-2. 设计经过人工确认。
+2. 设计经过人工授权或授权代理流程确认。
 3. 模块边界可验证。
 4. 实现可测试、可回退。
 5. 每次结论都有证据。
+6. GitHub 中的已提交 Feature 规格优先于开发机未提交草稿、stash 和会话记忆。
 
-## 2. 禁止提前编码
+规格产物可由两类执行者生成：
+
+- 开发机通过仓库官方 Spec Kit skills/脚本生成；
+- 经用户明确授权的第三方 GitHub Agent，按同一模板、Constitution、需求基线和门禁生成等价产物。
+
+GitHub Agent 生成的文件必须记录来源，不得伪称开发机已执行 `$speckit-*` 命令。
+
+## 2. 编码门禁
 
 以下条件任一未满足时，禁止新增或修改业务实现代码：
 
-- Constitution 未批准。
-- 当前 Feature Spec 未批准。
+- Constitution 未与当前需求一致。
+- 当前 Feature `spec.md` 不完整或仍有关键歧义。
 - Clarify 仍有关键未决项。
-- Plan 未批准。
+- `plan.md` 未冻结关键技术/契约/数据/测试边界。
 - Checklist 存在阻断项。
-- Tasks 未完成拆分。
+- `tasks.md` 未完成拆分。
 - Analyze 存在 Critical 或 High 冲突。
-- 用户尚未明确授权进入实现阶段。
+- 当前 Feature 的 Coding Readiness 未明确标记为 OPEN/READY。
+- 用户尚未授权该 Feature 实现范围。
 
-允许在编码门禁前修改的内容仅包括：
+允许在编码门禁前修改：
 
-- Markdown 需求/设计/ADR 文档。
-- Spec Kit 生成的规格与计划文件。
+- Markdown 需求/设计/ADR 文档；
+- Spec Kit 或 GitHub Agent 生成的规格、计划、清单和审计文件；
 - 纯配置模板且不改变运行行为的文档性内容。
+
+当 `specs/<feature>/CODING-READINESS.md` 明确记录 `Critical=0`、`High=0`、Checklist 无阻塞、实现授权来源明确时，Codex 可直接从 GitHub 指定 Feature 分支开始实现，无需重复执行已由 GitHub Agent 完成的 Spec Kit 等价阶段。
 
 ## 3. 架构硬约束
 
@@ -39,11 +50,11 @@
 
 禁止把以下关键决策完全交给一个自由 Agent Loop：
 
-- 是否检索知识库。
-- 使用哪个知识源。
-- 重试次数。
-- 证据是否充分。
-- 何时终止。
+- 是否检索知识库；
+- 使用哪个知识源；
+- 重试次数；
+- 证据是否充分；
+- 何时终止；
 - 是否输出无证据答案。
 
 ### 3.2 外部能力全部经过契约
@@ -62,13 +73,13 @@
 
 xmg-qa2 不负责：
 
-- PDF/PPT/Word 解析。
-- OCR。
-- 清洗。
-- 去重。
-- 分类。
-- 切片。
-- Embedding 批处理。
+- PDF/PPT/Word 解析；
+- OCR；
+- 清洗；
+- 去重；
+- 分类；
+- 切片；
+- Embedding 批处理；
 - 知识库构建。
 
 xmg-qa2 只消费 Knowledge Contract。
@@ -79,10 +90,10 @@ xmg-qa2 只消费 Knowledge Contract。
 
 强制规则：
 
-- `domain` 不得 import LangGraph、FastAPI、Dify、RAGFlow、OpenAI SDK。
-- `harness/contracts` 不得 import 任何具体 Provider。
-- `workflow` 不得 import DingTalk、Dify、RAGFlow 等实现。
-- `plugins` 可以依赖 contracts，但 contracts 不得反向依赖 plugins。
+- `domain` 不得 import LangGraph、FastAPI、Dify、RAGFlow、OpenAI SDK；
+- `harness/contracts` 不得 import 任何具体 Provider；
+- `workflow` 不得 import DingTalk、Dify、RAGFlow 等实现；
+- `plugins` 可以依赖 contracts，但 contracts 不得反向依赖 plugins；
 - `api/channels` 不得包含核心问答业务规则。
 
 ### 3.5 Provider Neutral
@@ -124,44 +135,43 @@ xmg-qa2 只消费 Knowledge Contract。
 
 记录模型/提示词版本、调用量、检索和错误分类；默认不导出原始 Prompt/客户日志，不保存隐藏思维链。必要审计内容按 case 权限和保留策略访问。
 
-## 6. Git 规范
+## 6. Git 与事实源规范
 
-- 必须使用标准 Git；常规仓库为 `.git/`，标准 linked worktree 的 `.git` 文件同样有效。
-- 禁止创建 `.git-data` 等非标准替代仓库，除非用户明确批准且有 ADR。
-- 开始任何 Feature 前确认 `git status`。
-- 一项 Feature 一个 Spec Kit Feature 分支：`feature/<number>-<slug>`。
-- 不在 `main` 上直接开发。
-- 变更前确保已有可回退提交。
-- 不使用 `git reset --hard`、`git clean -fdx` 等破坏性命令，除非用户明确批准。
-- 不擅自覆盖用户未提交文件。
+- GitHub 已提交分支是唯一开发事实源；开发机未提交文件、stash、未推送 Feature 和旧 Agent 会话不构成项目事实。
+- 一项 Feature 一个分支：`feature/<number>-<slug>`；禁止在 `main` 直接开发。
+- 第三方 GitHub Agent 负责设计阶段时，在 GitHub Feature 分支中提交规格、计划、任务、门禁和审计；Codex 后续只消费该分支。
+- 用户明确授权“强制以 GitHub 为准”时，Codex 可放弃本地未保存文件、stash 和未推送分支，并将工作树重置为指定远程 Feature；该授权不允许删除仓库外秘密、共享目录或其他项目数据。
+- `git reset --hard <remote-ref>` 和 `git clean -fd` 仅在用户本轮明确授权且已确认位于正确仓库时使用；禁止 `git clean -fdx`，避免误删 `.env`、凭证和本地工具缓存。
+- 禁止 force-push 共享分支，除非用户对具体分支明确授权并确认不会覆盖他人提交。
+- 进入实现前必须确认本地 HEAD 等于 GitHub 指定 Feature HEAD。
 
 ## 7. 实现工作规范
 
 进入实现阶段后：
 
-1. 先读 `spec.md`、`plan.md`、`tasks.md`、相关 ADR。
+1. 先读当前 Feature 的 `spec.md`、`plan.md`、`tasks.md`、`CODING-READINESS.md`、相关 ADR。
 2. 一次只执行当前 Task。
 3. 优先测试驱动。
 4. 修改后立即执行最小相关测试。
 5. 再执行集成测试。
 6. 失败时先定位根因，禁止无证据猜测式连续修改。
 7. 未实际运行验证命令，不得宣称“已解决”。
+8. 如果代码需求与规格冲突，停止实现并回到 GitHub Feature 规格修订，不在本地私自改变产品边界。
 
 ## 8. 完成定义
 
 任何 Task 声称完成必须附：
 
-- 修改文件。
-- 验证命令。
-- 验证输出摘要。
-- 影响范围。
-- 已知剩余风险。
+- 修改文件；
+- 验证命令；
+- 验证输出摘要；
+- 影响范围；
+- 已知剩余风险；
 - Git commit（进入正式实现阶段后）。
 
 “代码已写完”不等于完成。
 
-
-## 9. 本轮固定的产品边界
+## 9. 本轮固定产品边界
 
 - V1 是真实 KB/模型、钉钉、只读能力、人工恢复和报告的垂直闭环；Fake 只用于测试。
 - SupportTask 高于 Thread/Turn；等待须持久保存并释放 Worker，恢复验证 case/request/version/ACL。
@@ -170,7 +180,7 @@ xmg-qa2 只消费 Knowledge Contract。
 - 所有外发点执行数据策略；包括公开搜索、模型、embedding/rerank、MCP 参数与遥测。
 - 本系统任务/报告写入和授权渠道通知允许通过明确 system_effect 执行，不与客户目标写权限混淆。
 - 优先成熟开源；核心只实现支持领域规则，不堆叠多个 Agent 框架或知识入库系统。
-- 用户已授权本轮设计修订与推送；不因此推断业务编码、合并主分支或部署授权。
+- 用户已授权第三方 GitHub Agent 完成本 Feature 设计与开工门禁；不因此放宽客户生产安全边界。
 
 ## 10. Web、模板与分发
 
@@ -178,4 +188,22 @@ xmg-qa2 只消费 Knowledge Contract。
 - Admin 可写自有配置，但不能放宽客户目标只读权限；Case ACL 与管理员角色独立。
 - HTML/MD/主题按 [Presentation Contract](docs/architecture/PRESENTATION-CONTRACT.md)；模板热发布不等于任意 JS/Python 热执行。
 - 开发、镜像、在线/离线包及回退按 [Distribution](docs/architecture/DISTRIBUTION-DEPLOYMENT.md)；不能改坏开发机其他项目的工具链。
-- 第一 Feature 起步与现有缺口见 [Implementation Readiness](docs/plans/IMPLEMENTATION-READINESS.md)。用户已明确授权的实现范围通过规定门禁后直接执行，不重复索要相同授权。
+- 第一 Feature 起步与现有缺口见 [Implementation Readiness](docs/plans/IMPLEMENTATION-READINESS.md)。
+
+## 11. GitHub Agent → Codex 交接
+
+GitHub Agent 完成 Feature 设计时必须至少提交：
+
+- `spec.md`
+- `plan.md`
+- `research.md`
+- `data-model.md`
+- `quickstart.md`
+- `contracts/`
+- `checklists/requirements.md`
+- `checklists/implementation.md`
+- `tasks.md`
+- `analyze.md`
+- `CODING-READINESS.md`
+
+`CODING-READINESS.md` 是 Codex 开工入口，必须写明：设计来源、基线分支/提交、Critical/High 统计、Checklist 状态、授权范围、禁止事项、Codex 同步命令和第一个 Task。
