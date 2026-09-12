@@ -13,8 +13,6 @@ constitution → specify → clarify → plan → checklist → tasks → analyz
 
 GitHub Agent 模式不得伪称执行过 `$speckit-*` 命令；必须在 `CODING-READINESS.md` 和 `analyze.md` 中标记 `generated-by: external-github-agent`。判断是否可编码，以完整产物、可追溯性、Analyze 和 Checklist 结果为准，而不是依赖某台开发机的命令历史。
 
-需求与设计可以先行，但不能代替运行时 Feature 的完整门禁。
-
 ## 2. 本轮需求输入
 
 读取[需求基线](../requirements/REQUIREMENTS-BASELINE.md)、[架构](../architecture/ARCHITECTURE-BASELINE.md)、相关 Contracts/ADR 和[交付路线](../plans/V1-DELIVERY-PLAN.md)。Q1–9 已确认，余项由用户授权采用文档默认方案；不要再次逐题访谈。
@@ -23,13 +21,21 @@ V1 为真实业务闭环。首个运行时 Feature 可以用 Fake Provider 验�
 
 ## 3. 分支与事实源
 
-一项 Feature 一个 `feature/<number>-<slug>` 分支；编号在创建时检查远端、已有分支和 specs。
+一项 Feature 一个 `feature/<number>-<slug>` 实现分支；禁止在 `main` 直接编码。
 
-- GitHub 已提交分支是唯一开发事实源。
-- `feature/002-support-agent-baseline` 是当前架构/治理设计基线，未包含业务实现。
-- 首个运行时 Feature 为 `feature/003-support-foundation`，从 `feature/002-support-agent-baseline` 建立。
-- GitHub Agent 在 `feature/003-support-foundation` 生成完整设计门禁后，Codex 只消费该分支；开发机本地未提交文件、stash、旧 `001` Feature 和旧会话全部视为废弃历史。
-- 若 PR #2 后续合并 main，可将 003 的 PR base 调整到 main；不得因此重建另一套 003 规格。
+设计阶段可以先在 GitHub Feature 分支完成审计。当用户决定接受设计并合并后：
+
+- **合并后的 `main` 是唯一权威设计基线**；
+- 已合并设计分支可以删除；
+- 开发机本地未提交文件、stash、旧 Feature 和旧 Agent 会话都不能覆盖 `origin/main`；
+- Codex 必须先同步到干净的 `origin/main`，再从 main 新建当前 Feature 的实现分支。
+
+本轮历史来源：
+
+- `feature/002-support-agent-baseline`：架构/治理设计基线；
+- `feature/003-support-foundation`：首个运行时 Feature 的 Spec/Plan/Tasks/Analyze 设计分支。
+
+二者合并后，上述分支名仅作为历史 provenance；实现时以 main 中的 `specs/003-support-foundation/` 为正式规格来源。
 
 ## 4. 各步骤要解决什么
 
@@ -42,7 +48,7 @@ V1 为真实业务闭环。首个运行时 Feature 可以用 Fake Provider 验�
 | Checklist | 架构、安全、Evidence、恢复、观测、测试、运维 |
 | Tasks | 依赖顺序明确、可独立验证的小任务；每项含文件、测试和完成条件 |
 | Analyze | Spec/Plan/Tasks/Constitution 一致性；Critical=0、High=0 |
-| Coding Readiness | 汇总授权、基线 SHA、清单、同步命令、第一个 Task |
+| Coding Readiness | 汇总授权、基线、清单、同步命令、第一个 Task |
 | Implement | Codex 按 Task 实现，变更与证据一并记录 |
 | Converge | Spec/Plan/Tasks/Code/Tests 对照；不可只改文档掩盖代码偏差 |
 
@@ -71,23 +77,38 @@ specs/<feature>/
 - 无 `TBD`、`TODO`、未决 `[NEEDS CLARIFICATION]`；
 - 需求、计划、任务均可追溯到需求基线/架构/ADR；
 - Critical=0、High=0；
-- Checklist 无阻塞；
+- Checklist 无设计阻塞；
 - 真实未验证项必须标为实施验证任务，不能写成已通过；
 - 不把 Fake Provider 测试冒充真实 KB/模型/钉钉验收；
 - Coding Gate 只对当前 Feature 开放，不代表整体 V1 或生产发布就绪。
 
-## 6. Codex 开发机同步规则
+## 6. 本轮合并与开发机同步规则
 
-当用户已明确授权“放弃本地一切未保存进度，以 GitHub 为准”，且 `CODING-READINESS.md` 标记 READY 后，Codex 先确认仓库路径和 remote，再执行：
+当前 003 设计堆叠在 002 上。接受设计时按以下顺序：
+
+1. PR #2 使用 **merge commit** 合并到 `main`，保留 002 祖先关系；
+2. PR #3 retarget 到 `main` 并重新确认差异；
+3. PR #3 使用 merge commit 合并；
+4. 删除已完成/废弃的非 main 远端分支；
+5. 开发机以 `origin/main` 强制同步；
+6. 再从 main 创建干净的 `feature/003-support-foundation` 实现分支。
+
+开发机同步：
 
 ```bash
 git fetch origin --prune
-git switch feature/003-support-foundation
-git reset --hard origin/feature/003-support-foundation
+git switch main
+git reset --hard origin/main
 git clean -fd
 git status
 git rev-parse HEAD
-git rev-parse origin/feature/003-support-foundation
+git rev-parse origin/main
+```
+
+确认一致后：
+
+```bash
+git switch -C feature/003-support-foundation main
 ```
 
 约束：
@@ -96,11 +117,11 @@ git rev-parse origin/feature/003-support-foundation
 - 不恢复 stash；
 - 不恢复旧 `001-core-harness-product-qa`；
 - 不把本地未提交文件拷回新 Feature；
-- HEAD 与远端 SHA 不一致时禁止编码；
-- 编码前先阅读 `CODING-READINESS.md`、`spec.md`、`plan.md`、`tasks.md`。
+- HEAD 与 `origin/main` 不一致时禁止开始实现；
+- 实现前先阅读 `CODING-READINESS.md`、`spec.md`、`plan.md`、`tasks.md`。
 
 ## 7. 验证边界
 
-脚本 paths-only 或 branch dry-run 成功只证明路径/分支命名，不证明 Analyze 或业务测试通过。Fake 测试只证明受测边界，真实 Provider 合同与 E2E 仍需独立记录。
+设计审计、Markdown/YAML 检查和 mergeability 只能证明设计/仓库状态，不证明运行时代码、构建或业务测试通过。Fake 测试只证明受测边界，真实 Provider 合同与 E2E 仍需独立记录。
 
 长任务的失败、卡顿、人工补充与跨天恢复是 V1 验收必需项；不以普通同步聊天 E2E 代替。
