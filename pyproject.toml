@@ -49,3 +49,18 @@ extend-exclude = [".agents", ".specify"]
 python_version = "3.12"
 strict = true
 packages = ["xmg_qa2"]
+
+[tool.importlinter]
+root_package = "xmg_qa2"
+
+[[tool.importlinter.contracts]]
+name = "Harness contracts do not depend on plugins"
+type = "forbidden"
+source_modules = ["xmg_qa2.harness.contracts"]
+forbidden_modules = ["xmg_qa2.plugins"]
+
+[[tool.importlinter.contracts]]
+name = "Workflows do not depend on provider adapters"
+type = "forbidden"
+source_modules = ["xmg_qa2.workflows"]
+forbidden_modules = ["xmg_qa2.plugins"]

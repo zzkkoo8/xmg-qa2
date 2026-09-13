@@ -23,9 +23,9 @@ class CapabilityDescriptor:
     effect: CapabilityEffect
     enabled: bool
     timeout_seconds: int
+    metadata: Mapping[str, Any] = field(default_factory=dict)
     scope_rules: Mapping[str, Any] = field(default_factory=dict)
     retry_policy: Mapping[str, Any] = field(default_factory=dict)
-    metadata: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def is_executable_for_customer_target(self) -> bool:
