@@ -31,6 +31,9 @@ services:
 
   rabbitmq:
     image: rabbitmq:4.1.4-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: xmg_qa2
       RABBITMQ_DEFAULT_PASS: xmg_qa2

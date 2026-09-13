@@ -1,0 +1,1 @@
+"""Durable message transport adapters."""

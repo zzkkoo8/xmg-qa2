@@ -65,3 +65,7 @@ name = "Workflows do not depend on provider adapters"
 type = "forbidden"
 source_modules = ["xmg_qa2.workflows"]
 forbidden_modules = ["xmg_qa2.plugins"]
+
+[[tool.mypy.overrides]]
+module = ["celery", "celery.*"]
+ignore_missing_imports = true
