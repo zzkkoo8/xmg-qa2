@@ -15,6 +15,8 @@ x-app: &app
 services:
   postgres:
     image: postgres:17.6-bookworm
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: xmg_qa2
       POSTGRES_USER: xmg_qa2
