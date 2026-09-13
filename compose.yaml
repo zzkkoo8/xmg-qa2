@@ -1,0 +1,57 @@
+name: xmg-qa2
+
+x-app: &app
+  build:
+    context: .
+  environment:
+    DATABASE_URL: postgresql+psycopg://xmg_qa2:xmg_qa2@postgres:5432/xmg_qa2
+    CELERY_BROKER_URL: amqp://xmg_qa2:xmg_qa2@rabbitmq:5672//
+  depends_on:
+    postgres:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:17.6-bookworm
+    environment:
+      POSTGRES_DB: xmg_qa2
+      POSTGRES_USER: xmg_qa2
+      POSTGRES_PASSWORD: xmg_qa2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U xmg_qa2 -d xmg_qa2"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:4.1.4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: xmg_qa2
+      RABBITMQ_DEFAULT_PASS: xmg_qa2
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  api:
+    <<: *app
+    command: ["python", "-c", "import time, xmg_qa2; time.sleep(3600)"]
+
+  worker:
+    <<: *app
+    command: ["python", "-c", "import time, xmg_qa2; time.sleep(3600)"]
+
+  dispatcher:
+    <<: *app
+    command: ["python", "-c", "import time, xmg_qa2; time.sleep(3600)"]
+
+volumes:
+  postgres-data:
+  rabbitmq-data:

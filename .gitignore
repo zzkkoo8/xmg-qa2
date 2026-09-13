@@ -29,3 +29,10 @@ htmlcov/
 logs/
 tmp/
 .runtime/
+
+# Frontend
+node_modules/
+web/node_modules/
+web/dist/
+*.tsbuildinfo
+.repo_memory/
