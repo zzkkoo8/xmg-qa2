@@ -1,12 +1,19 @@
 # xmg-qa2 Constitution
 
-Version: 1.2.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-05
+Version: 1.3.0 | Adopted as design baseline: 2026-09-05 | Last amended: 2026-09-12
 
-授权来源：用户已确认 Q1–9，并于 2026-09-05 授权剩余问题采用最佳方案、审计修订设计并推送。本文由未填写模板形成项目宪法；此授权不包含业务编码、部署或生产目标变更。
+授权来源：用户已确认 Q1–9，并于 2026-09-05 授权剩余问题采用最佳方案、审计修订设计并推送；2026-09-12 用户进一步授权可信第三方 GitHub Agent 直接在 GitHub 分支中完成 Feature 设计、Spec/Plan/Checklist/Tasks/Analyze 等等价规格产物和开工审计，并明确要求开发机 Codex 放弃本地未提交进度、以 GitHub 已提交分支为唯一开发事实源。该授权仍不包含生产目标写操作、正式部署或越过本文件安全边界。
 
 ## I. 需求与规格先行
 
-需求必须可追溯到 docs/requirements/REQUIREMENTS-BASELINE.md。未知事实明确标注，默认设计项不得冒充用户逐题答复。每个业务 Feature 执行 constitution → specify → clarify → plan → checklist → tasks → analyze；Critical/High 清零并获得对应实现授权后才编码。
+需求必须可追溯到 docs/requirements/REQUIREMENTS-BASELINE.md。未知事实明确标注，默认设计项不得冒充用户逐题答复。每个业务 Feature 必须完成 constitution → specify → clarify → plan → checklist → tasks → analyze；Critical/High 清零并获得对应实现授权后才编码。
+
+规格产物有两种合法来源：
+
+1. 开发机通过仓库已有官方 Spec Kit Skill/脚本生成；或
+2. 经用户明确授权的可信 GitHub Agent，严格按仓库当前模板、Constitution、需求基线和 Spec Kit 质量门禁生成等价产物，并在产物中标记生成来源与审计状态。
+
+第二种方式不得伪称已在开发机执行 `$speckit-*` 命令；判断依据是产物完整性、可追溯性和门禁结果，而不是命令是否在某台主机实际运行。
 
 ## II. Workflow First 与能力可配置
 
@@ -58,20 +65,23 @@ Channel、Knowledge、Model、Tool、Policy 经稳定契约；Provider 私有类
 
 ## 开发与 Git 治理
 
-- 使用标准 Git；允许标准 linked worktree 的 .git 文件，禁止自造 .git-data 替代。
-- 开始变更检查 git status；保护用户未提交内容，保留可回退基线。
+- GitHub 已提交分支是项目协作与开发的唯一事实源；本地工作区只是可丢弃执行副本。
+- 开始变更检查 git status；通常保护用户未提交内容，但用户明确授权“以 GitHub 为准”时，Codex 可以放弃本地未提交文件、stash 和未推送 Feature，并重建为指定远程分支的干净副本。
 - 每 Feature 一个 feature/<number>-<slug> 分支，禁止 main 直接开发。
-- Spec Kit 生成的技能/脚本不手工改写；规格通过官方命令创建。
-- 设计修订允许文档、ADR 及必要治理配置；不得由“同意架构”推断业务实现授权。
-- 不使用未授权的 destructive reset/clean/force-push。
+- Spec Kit vendored 技能/脚本不手工改写；规格通过官方命令或经用户授权的 GitHub Agent 等价流程创建。GitHub Agent 必须记录 `generated-by`/审计来源，不得伪造命令执行历史。
+- Feature 进入 Coding Gate 前，spec/plan/checklists/tasks/analyze 必须齐全且一致；Critical=0、High=0、Checklist 无阻塞。
+- 设计修订允许文档、ADR 及必要治理配置；不得由“同意架构”推断生产写或部署授权。
+- 不使用 destructive reset/clean/force-push，除非用户当次明确授权；即使已授权，也不得删除仓库外秘密或共享主机数据。
 - V1 必须有真实 KB、模型、钉钉和只读能力闭环；Fake 仅用于测试里程碑。
 
 ## 变更规则
 
 宪法变更必须说明来源、影响、对应 ADR/需求与迁移，同步 AGENTS、Architecture、Workflow、Contracts 和门禁；破坏性范围提高主版本，兼容增补提高次版本，澄清提高补丁版本。遵守当次用户明确授权，不虚构已批准状态。
 
-本次同步：替换空模板；落实只读、持久任务、配置能力、真实 V1、开源复用和外发边界。未开放 Coding Gate。后续实施状态见 docs/governance/DEVELOPMENT-GATES.md。
+本次同步：替换空模板；落实只读、持久任务、配置能力、真实 V1、开源复用和外发边界。后续实施状态见 docs/governance/DEVELOPMENT-GATES.md。
 
 1.1.0 增补来源：用户本轮五项 Web/分发/扩展/编码准备审计要求；对应 ADR-0007 和需求 FR13–17。同步 Web、Presentation、Distribution、交付路线与门禁；此设计增补不冒充 Feature spec/plan/analyze 已执行。
 
 1.2.0 增补来源：用户要求以高质量问答与自主处理为产品核心；对应 ADR-0008 和 FR18–20。新增问答/评测规范，同步 Workflow、Task/Presentation 投影和实施优先级；不开放业务编码门禁。
+
+1.3.0 增补来源：用户明确授权第三方 GitHub Agent 在 GitHub 仓库中完成完整 Feature 设计和 Spec Kit 等价门禁，并要求 Codex 放弃本地未保存进度、以后以 GitHub 已提交分支为准。此变更只调整设计/开发协作方式，不放宽客户目标只读、安全、权限、测试和生产部署边界。

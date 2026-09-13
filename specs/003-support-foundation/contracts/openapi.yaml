@@ -1,0 +1,420 @@
+openapi: 3.1.0
+info:
+  title: xmg-qa2 Support Foundation API
+  version: 0.1.0
+servers:
+  - url: /api/v1
+paths:
+  /healthz:
+    get:
+      operationId: healthz
+      responses:
+        '200':
+          description: Process is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /readyz:
+    get:
+      operationId: readyz
+      responses:
+        '200':
+          description: Required dependencies are reachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: One or more required dependencies are not ready
+  /auth/login:
+    post:
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authenticated session/token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+  /tasks:
+    post:
+      operationId: createTask
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '202':
+          description: Task accepted and durably recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskAccepted'
+        '400':
+          description: Invalid question or scope
+        '403':
+          description: Principal not allowed for requested case scope
+    get:
+      operationId: listTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: Tasks visible to current principal
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskSummary'
+  /tasks/{task_id}:
+    get:
+      operationId: getTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Authorized task projection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskDetail'
+        '403':
+          description: Case scope denied
+        '404':
+          description: Task not found
+  /tasks/{task_id}/reply:
+    post:
+      operationId: replyToTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskReplyRequest'
+      responses:
+        '202':
+          description: Reply durably accepted for validation/resume
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResumeAccepted'
+        '409':
+          description: Reply targets stale/superseded request or task version
+  /tasks/{task_id}/cancel:
+    post:
+      operationId: cancelTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelTaskRequest'
+      responses:
+        '202':
+          description: Cancellation request durably recorded
+        '409':
+          description: Task cannot transition from current state
+  /tasks/{task_id}/events:
+    get:
+      operationId: listTaskEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+        - in: query
+          name: after
+          description: Event cursor from previous response
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Safe task progress/status events for reconnect/polling
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventPage'
+  /admin/ping:
+    get:
+      operationId: adminPing
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Admin authorization succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    const: true
+        '403':
+          description: Admin role required
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    TaskId:
+      in: path
+      name: task_id
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+    LoginResponse:
+      type: object
+      required: [access_token, token_type, expires_in, principal]
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          const: bearer
+        expires_in:
+          type: integer
+        principal:
+          $ref: '#/components/schemas/Principal'
+    Principal:
+      type: object
+      required: [id, username, roles]
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    CreateTaskRequest:
+      type: object
+      additionalProperties: false
+      required: [question, customer_id]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          maxLength: 20000
+        customer_id:
+          type: string
+          minLength: 1
+        project_id:
+          type: [string, 'null']
+        case_id:
+          type: [string, 'null']
+          format: uuid
+        client_message_id:
+          type: [string, 'null']
+          description: Optional inbound idempotency key
+    TaskAccepted:
+      type: object
+      required: [task_id, case_id, status, state_version]
+      properties:
+        task_id:
+          type: string
+          format: uuid
+        case_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        state_version:
+          type: integer
+    TaskSummary:
+      type: object
+      required: [task_id, case_id, status, question, state_version, updated_at]
+      properties:
+        task_id:
+          type: string
+          format: uuid
+        case_id:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        question:
+          type: string
+        state_version:
+          type: integer
+        updated_at:
+          type: string
+          format: date-time
+    TaskDetail:
+      allOf:
+        - $ref: '#/components/schemas/TaskSummary'
+        - type: object
+          required: [customer_id, pending_requests, answer]
+          properties:
+            customer_id:
+              type: string
+            project_id:
+              type: [string, 'null']
+            pending_requests:
+              type: array
+              items:
+                $ref: '#/components/schemas/HumanRequestProjection'
+            answer:
+              oneOf:
+                - $ref: '#/components/schemas/AnswerProjection'
+                - type: 'null'
+    HumanRequestProjection:
+      type: object
+      required: [request_id, request_version, status, prompt, required_fields]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        request_version:
+          type: integer
+        status:
+          type: string
+        prompt:
+          type: string
+        required_fields:
+          type: object
+    AnswerProjection:
+      type: object
+      required: [kind, body_markdown, citations, checked]
+      properties:
+        kind:
+          type: string
+          enum: [COMPLETE, PARTIAL, NEEDS_INPUT, UNABLE_TO_CONCLUDE]
+        body_markdown:
+          type: string
+        citations:
+          type: array
+          items:
+            type: object
+            required: [citation_id, evidence_id]
+            properties:
+              citation_id:
+                type: string
+              evidence_id:
+                type: string
+                format: uuid
+        checked:
+          type: boolean
+    TaskReplyRequest:
+      type: object
+      additionalProperties: false
+      required: [request_id, request_version, reply_id, content]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        request_version:
+          type: integer
+        reply_id:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 1
+          maxLength: 20000
+    ResumeAccepted:
+      type: object
+      required: [resume_attempt_id, status]
+      properties:
+        resume_attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [RECEIVED, REJECTED, QUEUED, APPLIED, FAILED]
+    CancelTaskRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        reason:
+          type: [string, 'null']
+          maxLength: 1000
+    EventPage:
+      type: object
+      required: [events, next_cursor]
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskEvent'
+        next_cursor:
+          type: [string, 'null']
+    TaskEvent:
+      type: object
+      required: [id, type, occurred_at, safe_payload]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        safe_payload:
+          type: object
+    TaskStatus:
+      type: string
+      enum: [NEW, RUNNING, WAITING_INPUT, PAUSED, RESOLVED, CLOSED, CANCELLED, FAILED]
