@@ -1,0 +1,23 @@
+scenarios:
+  - {name: generic-direct-answer, route: direct, outcome: COMPLETE, evidence_ids: [], may_resolve: true}
+  - {name: product-evidence-answer, route: retrieve, outcome: COMPLETE, evidence_ids: [doc-current], may_resolve: true}
+  - {name: version-mismatch, route: retrieve, outcome: PARTIAL, evidence_ids: [doc-old], may_resolve: false}
+  - {name: multi-subquestion-partial, route: retrieve, outcome: PARTIAL, evidence_ids: [doc-one], may_resolve: false}
+  - {name: minimum-clarification, route: request_input, outcome: NEEDS_INPUT, evidence_ids: [], may_resolve: false}
+  - {name: knowledge-empty-first-query, route: rewrite, outcome: PARTIAL, evidence_ids: [], may_resolve: false}
+  - {name: knowledge-empty-after-rewrite, route: fallback, outcome: UNABLE_TO_CONCLUDE, evidence_ids: [], may_resolve: false}
+  - {name: contradictory-evidence, route: investigate, outcome: PARTIAL, evidence_ids: [doc-a, doc-b], may_resolve: false}
+  - {name: model-malformed-output, route: fail_safe, outcome: UNABLE_TO_CONCLUDE, evidence_ids: [], may_resolve: false}
+  - {name: provider-timeout, route: retry_bounded, outcome: PARTIAL, evidence_ids: [], may_resolve: false}
+  - {name: provider-rate-limit, route: retry_bounded, outcome: PARTIAL, evidence_ids: [], may_resolve: false}
+  - {name: readonly-tool-observation, route: tool, outcome: COMPLETE, evidence_ids: [tool-health], may_resolve: true}
+  - {name: write-tool-denied, route: deny, outcome: PARTIAL, evidence_ids: [], denial_reason: WRITE_NOT_ALLOWED, may_resolve: false}
+  - {name: unknown-tool-denied, route: deny, outcome: PARTIAL, evidence_ids: [], denial_reason: UNKNOWN_EFFECT, may_resolve: false}
+  - {name: missing-capability, route: fail_safe, outcome: PARTIAL, evidence_ids: [], denial_reason: CAPABILITY_NOT_FOUND, may_resolve: false}
+  - {name: no-progress-stop, route: stop, outcome: UNABLE_TO_CONCLUDE, evidence_ids: [], may_resolve: false}
+  - {name: duplicate-evidence, route: deduplicate, outcome: COMPLETE, evidence_ids: [doc-current], may_resolve: true}
+  - {name: stale-evidence-version, route: investigate, outcome: PARTIAL, evidence_ids: [doc-old], may_resolve: false}
+  - {name: human-input-required, route: request_input, outcome: NEEDS_INPUT, evidence_ids: [], may_resolve: false}
+  - {name: partial-human-reply, route: request_input, outcome: NEEDS_INPUT, evidence_ids: [], may_resolve: false}
+  - {name: duplicate-reply, route: ignore_duplicate, outcome: NEEDS_INPUT, evidence_ids: [], denial_reason: DUPLICATE_REPLY, may_resolve: false}
+  - {name: stale-reply, route: reject_stale, outcome: NEEDS_INPUT, evidence_ids: [], denial_reason: STALE_REPLY, may_resolve: false}
