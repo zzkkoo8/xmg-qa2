@@ -1,14 +1,44 @@
 # xmg-qa2 架构基线
 
-版本：1.2；日期：2026-09-05；状态：设计完成，Pre-Implementation。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
+版本：1.3；日期：2026-09-13；状态：数字员工定位已澄清，003 Support Foundation 设计门禁已完成并合入 `main`，运行时实现待执行。产品范围以[需求基线](../requirements/REQUIREMENTS-BASELINE.md)为准。
 
 ## 1. 架构决定
 
-采用模块化单体代码库、中央 API 和独立 Worker 进程。LangGraph 负责调查图，Celery + RabbitMQ 负责有界执行段分发，PostgreSQL 负责业务任务和持久检查点。复用现有 Dify 知识服务，不重新构建知识平台。
+xmg-qa2 是“小马哥数字员工（xmg 系列）”中的首个企业级数字员工角色，定位为**数字技术支持工程师**。架构必须同时避免两个错误方向：一是把它退化成 Chatbot + RAG + Tools；二是为了未来扩展提前建设通用多 Agent 平台。
+
+采用模块化单体代码库、中央 API 和独立 Worker 进程。LangGraph 负责数字技术支持员工的调查图，Celery + RabbitMQ 负责有界执行段分发，PostgreSQL 负责业务任务和持久检查点。复用现有 Dify 知识服务，不重新构建知识平台。
 
 “XMG Harness”仅是业务控制与适配边界，不自研通用 Agent 框架、消息队列、调度器、向量数据库或低代码平台。选型理由和替代方案见[审计报告](../research/2026-09-05-STACK-AUDIT.md)。
 
-核心业务是[高质量问答](QA-CORE.md)：QuestionFrame → 按证据选取检索/调查能力 → AnswerDraft/AnswerCheck。语义对象归属现有 domain/application/workflow，调用既有 Contracts；不增加独立 Agent 服务。题集与质量门禁从首个问答 Feature 开始，任务/Web/配置/分发是其支撑。
+### 1.1 数字员工运行基础与 Support Domain
+
+当前设计采用“两层边界”，但 003 不为了未来复用提前拆成多个服务或通用框架：
+
+```text
+Digital Support Employee / xmg-qa2
+        │
+        ├── Support Domain
+        │   ├── QuestionFrame
+        │   ├── 技术调查 / 假设验证
+        │   ├── AnswerDraft / AnswerCheck
+        │   └── Support Workflow
+        │
+        └── 可复用运行语义
+            ├── 持久任务生命周期 / Run
+            ├── pause / resume / retry / idempotency
+            ├── Workflow execution
+            ├── XMG Harness / Registry / Adapter
+            ├── Knowledge / Model / Tool / MCP / Skill contracts
+            ├── Policy / ACL / Human-in-the-loop
+            ├── Evidence / Artifact / Audit
+            └── Observability
+```
+
+`QA Core` 明确定义为 **xmg-qa2 的 Support Domain Core**，不是整个 xmg 系列的 Runtime Core。`QuestionFrame`、`AnswerDraft`、`AnswerCheck` 等对象不得下沉成所有未来数字员工的必备模型。`SupportTask` 是当前技术支持角色的持久任务聚合；003 可以复用通用的任务生命周期语义，但不要求为了未来角色先抽象 `GenericTask` 基类或建立独立平台服务。
+
+未来如果出现 xmg-ops、xmg-dev、xmg-data、xmg-doc 等数字员工，可以复用已经经过真实实现验证的任务生命周期、Harness、Policy、Evidence、HITL 和可观测性能力，但各角色拥有自己的 Domain 与 Workflow。只有出现真正独立的职责、生命周期或跨员工协作需求时才引入 Agent-to-Agent；当前不增加独立 Agent 服务。
+
+xmg-qa2 的领域核心是[高质量问答与持续调查](QA-CORE.md)：QuestionFrame → 按证据选取检索/调查能力 → AnswerDraft/AnswerCheck。语义对象归属现有 domain/application/workflow，调用既有 Contracts。题集与质量门禁从首个问答 Feature 开始，任务/Web/配置/分发是其支撑。
 
 ## 2. 部署关系
 
