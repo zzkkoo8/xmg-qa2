@@ -1,54 +1,26 @@
-# Dependency Rules
+# 模块依赖规则
 
-## 1. 目的
+日期：2026-09-05。采用端口与适配器，不用一条线性箭头暗示所有插件必须依赖业务 Runtime。
 
-架构规则必须尽可能由自动化检查，而不是只存在于文档中。
+| 模块 | 可以依赖 | 禁止依赖 |
+| --- | --- | --- |
+| domain | Python 标准库与领域值对象 | LangGraph、FastAPI、SDK、数据库/队列客户端 |
+| harness/contracts | domain、Pydantic 等契约验证 | 具体 Provider、API、工作流实现 |
+| harness/registry | contracts、基础配置接口 | 厂商业务分支、外部动态安装器 |
+| workflows | domain、contracts、LangGraph 图构建 API | Dify/钉钉/产品 SDK、数据库连接 |
+| runtime | contracts、workflows、LangGraph、持久化端口 | 入口 payload 私有结构；插件私有业务逻辑 |
+| plugins | contracts、各自 SDK/HTTP 客户端、必要基础设施 | 核心 Workflow 业务规则、其他 Provider 私有实现 |
+| infrastructure | 持久化/队列/对象存储端口、官方客户端 | channel 业务、模型决定权限 |
+| api / channel | 应用服务接口、contracts | 证据裁决、调查逻辑、直接修改图内部状态 |
+| composition root | 装配具体 runtime、plugins、infrastructure | 业务策略 |
+| observability | 事件契约、OTel | 作为业务状态真相 |
+| web | 生成 API 类型/客户端、共享 UI、任务事件 Adapter | Provider 凭证、LangGraph 私有状态、直接访问 KB/模型/MCP |
+| presentation | ReportSnapshot/Template 契约、受控 renderer/sanitizer | 目标工具调用、数据库 ORM 对象、任意文件/网络 |
 
-## 2. 允许依赖
+Admin API 经应用服务完成配置发布、RBAC 和审计；前端隐藏菜单不能代替权限。业务结果先冻结成 ReportSnapshot，再经展示端口渲染，模板不修改调查状态。
 
-```text
-domain
-harness/contracts -> domain
-runtime -> harness/contracts, domain
-workflows -> runtime/contracts, harness/contracts, domain
-plugins -> harness/contracts, domain, infrastructure primitives
-api -> runtime, harness/contracts
-observability -> contracts/events
-```
+workflows 可使用 LangGraph，但图私有 State 不暴露给 domain/HTTP/Provider。数据操作经明确端口，运行引擎通过适配器接 checkpoint；SQLAlchemy Session 不跨并发任务共享。
 
-## 3. 禁止依赖
+实施阶段采用 Import Linter 的 forbidden/layers/independence 合约和 CI 验证，先为可运行包结构定义规则；本轮不创建形式化空测试。[Import Linter 官方说明](https://github.com/seddonym/import-linter)
 
-```text
-domain -> fastapi
-domain -> langgraph
-domain -> provider SDK
-
-harness/contracts -> dify
-harness/contracts -> ragflow
-harness/contracts -> openai
-harness/contracts -> dingtalk
-
-workflows -> concrete provider SDK
-workflows -> channel SDK
-```
-
-## 4. CI 要求
-
-正式实现阶段应引入自动依赖检查。
-
-工具在 Plan 阶段确定，但必须能够检测：
-
-- forbidden imports。
-- layer cycles。
-- Provider 泄漏到 Core。
-- tests 之外的逆向依赖。
-
-## 5. 架构变更
-
-需要违反现有依赖方向时：
-
-1. 停止编码。
-2. 写 ADR。
-3. 更新 Architecture Baseline。
-4. 执行 SpecKit analyze。
-5. 人工批准后再修改。
+代码位置目标复用现有 src/xmg_qa2 下目录；需要新目录的具体文件在 Feature Plan 冻结，不为了目录美观创建一批空模块。违反依赖方向必须先 ADR、更新相关设计、执行 Analyze，再取得相应实现授权。
